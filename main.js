@@ -148,34 +148,6 @@ const RELEASES = [
     image: 'images/release-drx007.jpg',
     beatport: 'https://ffm.to/pnwk0dy',
   },
-  {
-    catalog: 'DRX006',
-    title: 'Selfish Ways',
-    artist: 'Tony H',
-    image: 'images/release-drx006.jpg',
-    beatport: 'https://ffm.to/orj0z3q',
-  },
-  {
-    catalog: 'DRX005',
-    title: 'This Shit',
-    artist: 'Max Mash',
-    image: 'images/release-drx004b.jpg',
-    beatport: 'https://ffm.to/wbyjyj8',
-  },
-  {
-    catalog: 'DRX004',
-    title: 'Believe',
-    artist: 'Grainge',
-    image: 'images/release-drx004.jpg',
-    beatport: 'https://ffm.to/p0j2jro',
-  },
-  {
-    catalog: 'DRX003',
-    title: 'Acid Machine',
-    artist: 'EDEF',
-    image: 'images/release-drx005.jpg',
-    beatport: 'https://ffm.to/woyjara',
-  },
 ];
 
 const MERCH = [
