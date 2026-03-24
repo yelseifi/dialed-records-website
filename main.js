@@ -176,22 +176,6 @@ const RELEASES = [
     image: 'images/release-drx005.jpg',
     beatport: 'https://ffm.to/woyjara',
   },
-  {
-    catalog: 'DRX002',
-    title: 'Something Different',
-    artist: 'Matt James',
-    image: 'images/stream-2.png',
-    beatport: 'https://soundcloud.com/dialedrecords/dxr002-something-different-matt-james',
-    darkBg: true,
-  },
-  {
-    catalog: 'DRX001',
-    title: 'Magic Powders',
-    artist: 'Dialed Records',
-    image: 'images/stream-3.png',
-    beatport: 'https://soundcloud.com/dialedrecords/magic-powders',
-    darkBg: true,
-  },
 ];
 
 const MERCH = [
