@@ -155,6 +155,27 @@ const RELEASES = [
     image: 'images/release-drx006.jpg',
     beatport: 'https://ditto.fm/selfish-ways-radio-edit',
   },
+  {
+    catalog: 'DRX003',
+    title: 'Narratives EP',
+    artist: 'Josh Lee',
+    image: 'images/stream-1.jpg',
+    beatport: 'https://soundcloud.com/dialedrecords/sets/drx003-narratives-ep-josh-lee',
+  },
+  {
+    catalog: 'DRX002',
+    title: 'Something Different',
+    artist: 'Matt James',
+    image: 'images/stream-2.png',
+    beatport: 'https://soundcloud.com/dialedrecords/dxr002-something-different-matt-james',
+  },
+  {
+    catalog: 'DRX001',
+    title: 'Magic Powders',
+    artist: 'Dialed Records',
+    image: 'images/stream-3.png',
+    beatport: 'https://soundcloud.com/dialedrecords/magic-powders',
+  },
 ];
 
 const MERCH = [
