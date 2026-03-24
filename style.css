@@ -1,0 +1,612 @@
+/* =============================================
+   DIALED RECORDS — style.css
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --black:    #000;
+  --white:    #fff;
+  --dim:      rgba(255,255,255,0.4);
+  --dimmer:   rgba(255,255,255,0.15);
+  --border:   rgba(255,255,255,0.07);
+  --font:     'Space Grotesk', sans-serif;
+  --mono:     'Space Mono', monospace;
+  --pad:      clamp(20px, 5vw, 72px);
+  --max:      1380px;
+  --radius:   8px;
+  --ease:     cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+
+/* ─── PAGE LOAD OVERLAY ───────────────────── */
+
+#page-load {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pl-logo-wrap {
+  width: clamp(200px, 32vw, 420px);
+  overflow: hidden;
+  aspect-ratio: 1206 / 877;
+  opacity: 0;
+}
+
+.pl-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+/* ─── NAV ─────────────────────────────────── */
+
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px var(--pad);
+  transition: background 0.5s var(--ease), backdrop-filter 0.5s var(--ease), border-color 0.5s;
+  border-bottom: 1px solid transparent;
+}
+
+#nav.scrolled {
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: var(--border);
+}
+
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--white); }
+
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 201;
+}
+
+.burger span {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--white);
+  transform-origin: center;
+  transition: transform 0.35s var(--ease), opacity 0.35s;
+}
+
+
+/* ─── MOBILE MENU ─────────────────────────── */
+
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  transform: translateY(-100%);
+  transition: transform 0.55s var(--ease);
+}
+
+.mobile-menu.open { transform: translateY(0); }
+
+.mobile-link {
+  font-family: var(--mono);
+  font-size: clamp(28px, 8vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.mobile-link:hover { color: var(--dim); }
+
+.mobile-socials {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 24px;
+  margin-top: 12px;
+}
+
+.mobile-socials a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+
+.mobile-socials a:hover { color: var(--white); }
+
+
+/* ─── HERO ────────────────────────────────── */
+
+#hero {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Crop wrapper: show top 65% of image — hides Josh Lee text (starts at 75%) */
+.hero-logo-wrap {
+  width: clamp(280px, 42vw, 540px);
+  aspect-ratio: 1206 / 877; /* pixel-exact crop to row 877 of 1350 */
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  /* animated via JS (target .hero-logo-wrap instead of img) */
+}
+
+.hero-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--dim);
+  opacity: 0;
+  transform: translateY(10px);
+  /* animated via JS */
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  color: var(--dimmer);
+  animation: bob 2.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(9px); }
+}
+
+
+/* ─── SECTIONS ────────────────────────────── */
+
+section { padding: 100px 0; }
+
+.section-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 48px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h2 {
+  font-family: var(--mono);
+  font-size: clamp(22px, 3.5vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.view-all {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.view-all:hover { color: var(--white); }
+
+
+/* ─── RELEASE CARDS ───────────────────────── */
+
+.releases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.release-card {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  background: #0a0a0a;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  display: block;
+}
+
+.release-card:hover {
+  transform: translateY(-5px);
+}
+
+.release-card .card-img-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.release-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+  display: block;
+}
+
+.release-card:hover img {
+  transform: scale(1.04);
+}
+
+.card-info {
+  padding: 14px 16px 16px;
+  position: relative;
+}
+
+.card-catalog {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.card-artist {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.card-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.card-tag.preorder {
+  border-color: rgba(255,255,255,0.25);
+  color: var(--white);
+}
+
+
+/* ─── EVENTS ──────────────────────────────── */
+
+#events { background: #020202; }
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-item {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: start;
+  gap: 24px 40px;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  transform: translateX(-16px);
+  /* animated via JS */
+}
+
+.event-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding-top: 5px;
+  line-height: 1.6;
+}
+
+.event-name {
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.event-subtitle {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+.event-venue {
+  font-size: 14px;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+
+.event-lineup {
+  font-size: 13px;
+  color: rgba(255,255,255,0.28);
+  line-height: 1.7;
+}
+
+.event-cta {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 5px;
+}
+
+.event-cta a {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.event-cta a:hover {
+  background: var(--white);
+  color: var(--black);
+  border-color: var(--white);
+}
+
+.events-empty {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  padding: 40px 0;
+}
+
+
+/* ─── MERCH CARDS ─────────────────────────── */
+
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.merch-card {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  background: #0a0a0a;
+  transition: transform 0.35s var(--ease);
+  display: block;
+}
+
+.merch-card:hover { transform: translateY(-5px); }
+
+.merch-card .card-img-wrap {
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.merch-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+  display: block;
+}
+
+/* CSS radial mask — instant fallback, strips harsh studio bg edges */
+.merch-card img {
+  -webkit-mask-image: radial-gradient(
+    ellipse 90% 90% at 50% 46%,
+    black 38%,
+    rgba(0,0,0,0.85) 55%,
+    rgba(0,0,0,0.35) 72%,
+    transparent 88%
+  );
+  mask-image: radial-gradient(
+    ellipse 90% 90% at 50% 46%,
+    black 38%,
+    rgba(0,0,0,0.85) 55%,
+    rgba(0,0,0,0.35) 72%,
+    transparent 88%
+  );
+}
+
+/* Once canvas bg removal succeeds, override mask with transparent edges already baked in */
+.merch-card img.bg-removed {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.merch-card:hover img { transform: scale(1.04); }
+
+.merch-card .card-info {
+  padding: 14px 16px 16px;
+}
+
+.merch-card .card-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* ─── FOOTER ──────────────────────────────── */
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 64px var(--pad) 48px;
+  max-width: 100%;
+}
+
+.footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  max-width: var(--max);
+  margin: 0 auto 40px;
+  flex-wrap: wrap;
+}
+
+.footer-logo {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  justify-content: flex-end;
+}
+
+.footer-socials a {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+
+.footer-socials a:hover { color: var(--white); }
+
+.footer-copy {
+  max-width: var(--max);
+  margin: 0 auto;
+  font-size: 11px;
+  color: rgba(255,255,255,0.18);
+  letter-spacing: 0.06em;
+}
+
+
+/* ─── RESPONSIVE ──────────────────────────── */
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .burger { display: flex; }
+
+  .event-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 28px 0;
+  }
+
+  .event-cta { margin-top: 4px; }
+
+  .footer-socials { justify-content: flex-start; }
+
+  .footer-top { flex-direction: column; gap: 20px; }
+}
+
+@media (max-width: 480px) {
+  section { padding: 72px 0; }
+  .section-header { margin-bottom: 32px; }
+  .releases-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .merch-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+}
