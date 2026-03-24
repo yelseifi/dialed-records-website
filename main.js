@@ -161,6 +161,7 @@ const RELEASES = [
     artist: 'Josh Lee',
     image: 'images/stream-1.jpg',
     beatport: 'https://soundcloud.com/dialedrecords/sets/drx003-narratives-ep-josh-lee',
+    darkBg: true,
   },
   {
     catalog: 'DRX002',
@@ -168,6 +169,7 @@ const RELEASES = [
     artist: 'Matt James',
     image: 'images/stream-2.png',
     beatport: 'https://soundcloud.com/dialedrecords/dxr002-something-different-matt-james',
+    darkBg: true,
   },
   {
     catalog: 'DRX001',
@@ -175,6 +177,7 @@ const RELEASES = [
     artist: 'Dialed Records',
     image: 'images/stream-3.png',
     beatport: 'https://soundcloud.com/dialedrecords/magic-powders',
+    darkBg: true,
   },
 ];
 
@@ -397,7 +400,7 @@ function renderReleases() {
       img.crossOrigin = 'anonymous';
       img.loading = 'lazy';
       wrap.appendChild(img);
-      applyAmbilight(card, img, false);
+      if (!release.darkBg) applyAmbilight(card, img, false);
     } else {
       const noArt = document.createElement('div');
       noArt.className = 'card-no-art';
