@@ -64,6 +64,97 @@ const RELEASES = [
     image: 'images/release-drx017.jpg',
     beatport: 'https://www.beatport.com/release/jump-on-tha/5339151',
   },
+  {
+    catalog: 'DRX016',
+    title: 'In the Jungle',
+    artist: 'Tamarin, ODJO',
+    image: null,
+    beatport: 'https://www.beatport.com/release/in-the-jungle/5289932',
+  },
+  {
+    catalog: 'DRX015',
+    title: 'Feel the Bass',
+    artist: 'EDEF',
+    image: null,
+    beatport: 'https://www.beatport.com/release/feel-the-bass/5289931',
+  },
+  {
+    catalog: 'DRXIBZ25',
+    title: "DRX Ibiza Sampler '25",
+    artist: 'Various Artists',
+    image: null,
+    beatport: 'https://www.beatport.com/release/drx-ibiza-sampler-25/5255032',
+  },
+  {
+    catalog: 'DRX014',
+    title: 'To My Beat',
+    artist: 'Pods',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: 'DRX013',
+    title: 'Count It',
+    artist: 'Blooma',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: 'DRX012',
+    title: 'Air Drums',
+    artist: 'Nacho Padilla',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: "DRXMMW25",
+    title: "DRX MMW VA '25",
+    artist: 'Various Artists',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: 'DRX011',
+    title: 'SVP',
+    artist: 'Max Mash',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: 'DRX010',
+    title: 'What I Want',
+    artist: 'LucaG',
+    image: null,
+    beatport: 'https://www.beatport.com/label/dialed-records/124294',
+  },
+  {
+    catalog: 'DRX009',
+    title: 'GO',
+    artist: 'JJ Illgen',
+    image: null,
+    beatport: 'https://ditto.fm/go-jj-illgen',
+  },
+  {
+    catalog: 'DRX008',
+    title: 'Hype the Funk',
+    artist: 'EDEF',
+    image: null,
+    beatport: 'https://ditto.fm/hype-the-funk',
+  },
+  {
+    catalog: 'DRX007',
+    title: 'Narratives',
+    artist: 'Matt James, Josh Lee',
+    image: null,
+    beatport: 'https://ditto.fm/narratives-matt-james',
+  },
+  {
+    catalog: 'DRX006',
+    title: 'Selfish Ways',
+    artist: 'Tony H',
+    image: null,
+    beatport: 'https://ditto.fm/selfish-ways-radio-edit',
+  },
 ];
 
 const MERCH = [
@@ -278,13 +369,20 @@ function renderReleases() {
     const wrap = document.createElement('div');
     wrap.className = 'card-img-wrap';
 
-    const img = document.createElement('img');
-    img.src = release.image;
-    img.alt = `${release.title} — ${release.artist}`;
-    img.crossOrigin = 'anonymous';
-    img.loading = 'lazy';
-
-    wrap.appendChild(img);
+    if (release.image) {
+      const img = document.createElement('img');
+      img.src = release.image;
+      img.alt = `${release.title} — ${release.artist}`;
+      img.crossOrigin = 'anonymous';
+      img.loading = 'lazy';
+      wrap.appendChild(img);
+      applyAmbilight(card, img, false);
+    } else {
+      const noArt = document.createElement('div');
+      noArt.className = 'card-no-art';
+      noArt.innerHTML = `<span>${release.catalog}</span>`;
+      wrap.appendChild(noArt);
+    }
 
     const info = document.createElement('div');
     info.className = 'card-info';
@@ -298,8 +396,6 @@ function renderReleases() {
     card.appendChild(wrap);
     card.appendChild(info);
     grid.appendChild(card);
-
-    applyAmbilight(card, img, false);
   });
 }
 
