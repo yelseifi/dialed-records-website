@@ -148,6 +148,13 @@ const RELEASES = [
     image: 'images/release-drx007.jpg',
     beatport: 'https://ffm.to/pnwk0dy',
   },
+  {
+    catalog: 'DRX006',
+    title: 'Selfish Ways',
+    artist: 'Tony H',
+    image: 'images/release-drx006.jpg',
+    beatport: 'https://ffm.to/orj0z3q',
+  },
 ];
 
 const MERCH = [
