@@ -142,67 +142,76 @@ const RELEASES = [
     beatport: 'https://ffm.to/d3xrnqy',
   },
   {
-    catalog: 'DRX007',
-    title: 'Narratives',
-    artist: 'Matt James, Josh Lee',
-    image: 'images/release-drx007.jpg',
-    beatport: 'https://ffm.to/pnwk0dy',
-  },
-  {
     catalog: 'DRX006',
     title: 'Selfish Ways',
     artist: 'Tony H',
     image: 'images/release-drx006.jpg',
     beatport: 'https://ffm.to/orj0z3q',
   },
+  {
+    catalog: 'DRX005',
+    title: 'Believe',
+    artist: 'Grainge',
+    image: 'images/release-drx005.jpg',
+    beatport: 'https://soundcloud.com/dialedrecords/drx005-believe-original-mix-grainge',
+  },
+  {
+    catalog: 'DRX004',
+    title: 'Acid Machine',
+    artist: 'EDEF',
+    image: 'images/release-drx004.jpg',
+    beatport: 'https://soundcloud.com/dialedrecords/drx004-acid-machine-radio-edit',
+  },
+  {
+    catalog: 'DRXOG',
+    title: 'Narratives (OG Vinyl)',
+    artist: 'Matt James, Josh Lee',
+    image: 'images/release-drxog.jpg',
+    beatport: 'https://ffm.to/pnwk0dy',
+  },
 ];
 
 const MERCH = [
   {
     name: 'Dialed Long Sleeve',
-    image: 'images/merch-long-sleeve.jpg',
+    image: 'images/merch-long-sleeve.png',
     link: 'https://linktr.ee/dialedrecords',
   },
   {
     name: 'Rotary Dial Tee',
-    image: 'images/merch-rotary-tee.jpg',
+    image: 'images/merch-rotary-tee.png',
     link: 'https://linktr.ee/dialedrecords',
   },
   {
     name: 'Dialed Hoodie',
-    image: 'images/merch-hoodie.jpg',
+    image: 'images/merch-hoodie.png',
     link: 'https://linktr.ee/dialedrecords',
   },
   {
     name: 'Dialed Long Sleeve II',
-    image: 'images/merch-long-sleeve-2.jpg',
+    image: 'images/merch-long-sleeve-2.png',
     link: 'https://linktr.ee/dialedrecords',
   },
   {
     name: 'Miami Tee',
-    image: 'images/merch-miami-tee.jpg',
-    link: 'https://linktr.ee/dialedrecords',
-  },
-  {
-    name: 'Dialed Tee',
-    image: 'images/merch-dialed-tee.jpg',
+    image: 'images/merch-miami-tee.png',
     link: 'https://linktr.ee/dialedrecords',
   },
   {
     name: 'Miami Beach Tee',
-    image: 'images/merch-miami-beach-tee.jpg',
+    image: 'images/merch-miami-beach-tee.png',
     link: 'https://linktr.ee/dialedrecords',
   },
 ];
 
 const EVENTS = [
   {
-    date: 'Mar 26\n2026',
-    name: 'Beatport Live — The Block',
-    subtitle: 'Dialed Records Takeover',
-    venue: 'Toe Jam · Miami, FL',
-    lineup: 'Dan Ghenacia b2b m.O.N.R.O.E. · Richy Ahmed · Josh Lee b2b Shane Kwon · Whois86 b2b SIMMI',
-    link: 'https://linktr.ee/dialedevents',
+    date: 'May 23\n2026',
+    name: 'Seb Zito · Politics Of Dancing',
+    subtitle: 'Dialed Records Label Showcase',
+    venue: 'Detour · Los Angeles, CA',
+    lineup: 'Seb Zito · Politics Of Dancing · Sami Sebastian',
+    link: 'https://www.crowdvolt.com/event/pos/26fc033a-7b57-41ff-a939-609c73cba00d',
   },
 ];
 
@@ -394,7 +403,7 @@ function renderReleases() {
       <div class="card-catalog">${release.catalog}</div>
       <div class="card-title">${release.title}</div>
       <div class="card-artist">${release.artist}</div>
-      <div class="card-tag${release.preorder ? ' preorder' : ''}">${release.preorder ? 'Pre-Order' : 'Beatport'}</div>
+      <div class="card-tag${release.preorder ? ' preorder' : ''}">${release.preorder ? 'Pre-Order' : 'Listen'}</div>
     `;
 
     card.appendChild(wrap);
@@ -452,7 +461,6 @@ function renderMerch() {
     const img = document.createElement('img');
     img.src = item.image;
     img.alt = item.name;
-    img.crossOrigin = 'anonymous';
     img.loading = 'lazy';
 
     wrap.appendChild(img);
@@ -464,9 +472,6 @@ function renderMerch() {
     card.appendChild(wrap);
     card.appendChild(info);
     grid.appendChild(card);
-
-    applyAmbilight(card, img, true);
-    removeStudioBackground(img);
   });
 }
 
