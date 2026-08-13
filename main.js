@@ -8,12 +8,32 @@ gsap.registerPlugin(ScrollTrigger);
 
 const RELEASES = [
   {
+    catalog: 'DRX025',
+    title: 'Guess U Know?',
+    artist: 'Joe Allen',
+    image: 'images/release-drx025.jpg',
+    beatport: 'https://ffm.to/guess-u-know',
+  },
+  {
+    catalog: 'DRX024',
+    title: 'Radiowave',
+    artist: 'Cass Brewster',
+    image: 'images/release-drx024.jpg',
+    beatport: 'https://ffm.to/radiowave-vhpv',
+  },
+  {
+    catalog: 'DRX023',
+    title: 'Disconnected',
+    artist: 'Facundo Godoy',
+    image: 'images/release-drx023.jpg',
+    beatport: 'https://ffm.to/disconnected-single',
+  },
+  {
     catalog: "DRX MMW '26",
     title: "DRX MMW VA '26",
     artist: 'Various Artists',
     image: 'images/release-drxmmw26.jpg',
-    beatport: 'https://www.beatport.com/release/drx-mmw-va-26/6482929',
-    preorder: true,
+    beatport: 'https://ffm.to/drx-mmw-va-26',
   },
   {
     catalog: 'DRX022',
@@ -142,11 +162,18 @@ const RELEASES = [
     beatport: 'https://ffm.to/d3xrnqy',
   },
   {
-    catalog: 'DRX006',
+    catalog: 'DRX007',
     title: 'Selfish Ways',
     artist: 'Tony H',
-    image: 'images/release-drx006.jpg',
+    image: 'images/release-drx007.jpg',
     beatport: 'https://ffm.to/orj0z3q',
+  },
+  {
+    catalog: 'DRX006',
+    title: 'This Shit',
+    artist: 'Max Mash',
+    image: 'images/release-drx006.jpg',
+    beatport: 'https://ffm.to/wbyjyj8',
   },
   {
     catalog: 'DRX005',
@@ -164,7 +191,7 @@ const RELEASES = [
   },
   {
     catalog: 'DRXOG',
-    title: 'Narratives (OG Vinyl)',
+    title: 'Narratives',
     artist: 'Matt James, Josh Lee',
     image: 'images/release-drxog.jpg',
     beatport: 'https://ffm.to/pnwk0dy',
@@ -173,47 +200,72 @@ const RELEASES = [
 
 const MERCH = [
   {
+    name: 'Dialed x Von Dutch Hat',
+    image: 'images/merch-von-dutch.jpg',
+    link: 'https://dialedrecords.bandcamp.com/merch/dialed-records-x-von-dutch',
+  },
+  {
     name: 'Dialed Long Sleeve',
     image: 'images/merch-long-sleeve.png',
-    link: 'https://linktr.ee/dialedrecords',
+    link: 'https://dialedrecords.bandcamp.com/merch/dialed-records-long-sleeve',
   },
   {
     name: 'Rotary Dial Tee',
     image: 'images/merch-rotary-tee.png',
-    link: 'https://linktr.ee/dialedrecords',
+    link: 'https://dialedrecords.bandcamp.com/merch/dialed-records-t-shirt',
   },
   {
     name: 'Dialed Hoodie',
     image: 'images/merch-hoodie.png',
-    link: 'https://linktr.ee/dialedrecords',
+    link: 'https://dialedrecords.bandcamp.com/merch/dialed-records-hoodie',
   },
   {
-    name: 'Dialed Long Sleeve II',
-    image: 'images/merch-long-sleeve-2.png',
-    link: 'https://linktr.ee/dialedrecords',
-  },
-  {
-    name: 'Miami Tee',
-    image: 'images/merch-miami-tee.png',
-    link: 'https://linktr.ee/dialedrecords',
+    name: 'MMW26 Tee',
+    image: 'images/merch-dialed-tee.png',
+    link: 'https://dialedrecords.bandcamp.com/merch/dialed-records-mmw26-t-shirt',
   },
   {
     name: 'Miami Beach Tee',
     image: 'images/merch-miami-beach-tee.png',
-    link: 'https://linktr.ee/dialedrecords',
+    link: 'https://dialedrecords.bandcamp.com/merch',
   },
 ];
 
 const EVENTS = [
   {
-    date: 'May 23\n2026',
-    name: 'Seb Zito · Politics Of Dancing',
-    subtitle: 'Dialed Records Label Showcase',
-    venue: 'Detour · Los Angeles, CA',
-    lineup: 'Seb Zito · Politics Of Dancing · Sami Sebastian',
-    link: 'https://www.crowdvolt.com/event/pos/26fc033a-7b57-41ff-a939-609c73cba00d',
+    date: 'Aug 21\n2026',
+    name: 'Sepp',
+    subtitle: 'Dialed Records Presents · Utopia Fridays',
+    venue: 'Utopia · Los Angeles, CA',
+    lineup: 'Sepp · Josh Lee · DJ Monico · Whois86',
+    link: 'https://posh.vip/e/utopia-fridays-2026-8-22-12-0',
   },
 ];
+
+const ALL_EVENTS_URL = 'https://linktr.ee/dialedevents';
+
+/* Recent posts pulled from @dialedrecords — shown as a scrolling gallery.
+   Drop new images in images/gallery/ and list them here to update. */
+const GALLERY = [
+  'images/gallery/ig-01.jpg',
+  'images/gallery/ig-02.jpg',
+  'images/gallery/ig-03.jpg',
+  'images/gallery/ig-04.jpg',
+  'images/gallery/ig-05.jpg',
+  'images/gallery/ig-06.jpg',
+  'images/gallery/ig-07.jpg',
+  'images/gallery/ig-08.jpg',
+  'images/gallery/ig-09.jpg',
+  'images/gallery/ig-10.jpg',
+  'images/gallery/ig-11.jpg',
+  'images/gallery/ig-12.jpg',
+  'images/gallery/ig-13.jpg',
+  'images/gallery/ig-14.jpg',
+  'images/gallery/ig-15.jpg',
+  'images/gallery/ig-16.jpg',
+];
+
+const INSTAGRAM_URL = 'https://www.instagram.com/dialedrecords/';
 
 
 /* ─── BACKGROUND REMOVAL ENGINE ────────────────
@@ -420,7 +472,6 @@ function renderEvents() {
 
   if (!EVENTS.length) {
     list.innerHTML = '<p class="events-empty">No upcoming events. Check back soon.</p>';
-    return;
   }
 
   EVENTS.forEach(ev => {
@@ -439,6 +490,30 @@ function renderEvents() {
       </div>
     `;
     list.appendChild(item);
+  });
+
+  const cta = document.createElement('div');
+  cta.className = 'events-all-cta';
+  cta.innerHTML = `<a href="${ALL_EVENTS_URL}" target="_blank" rel="noopener">Tickets + All Events ↗</a>`;
+  list.appendChild(cta);
+}
+
+
+/* ─── RENDER: GALLERY ───────────────────────── */
+
+function renderGallery() {
+  const track = document.querySelector('.gallery-track');
+  if (!track) return;
+
+  // Duplicate the set so the CSS marquee loops seamlessly
+  [...GALLERY, ...GALLERY].forEach(src => {
+    const item = document.createElement('a');
+    item.href = INSTAGRAM_URL;
+    item.target = '_blank';
+    item.rel = 'noopener noreferrer';
+    item.className = 'gallery-item';
+    item.innerHTML = `<img src="${src}" alt="Dialed Records on Instagram" loading="lazy">`;
+    track.appendChild(item);
   });
 }
 
@@ -627,6 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderReleases();
   renderEvents();
   renderMerch();
+  renderGallery();
 
   // Give DOM a frame to paint before triggering scroll anims
   requestAnimationFrame(() => {
