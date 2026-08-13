@@ -244,25 +244,14 @@ const EVENTS = [
 
 const ALL_EVENTS_URL = 'https://linktr.ee/dialedevents';
 
-/* Recent posts pulled from @dialedrecords — shown as a scrolling gallery.
-   Drop new images in images/gallery/ and list them here to update. */
+/* Posts from @dialedrecords, newest first — each tile links to its post.
+   To add one: save the image in images/gallery/ and add {image, url} here. */
 const GALLERY = [
-  'images/gallery/ig-01.jpg',
-  'images/gallery/ig-02.jpg',
-  'images/gallery/ig-03.jpg',
-  'images/gallery/ig-04.jpg',
-  'images/gallery/ig-05.jpg',
-  'images/gallery/ig-06.jpg',
-  'images/gallery/ig-07.jpg',
-  'images/gallery/ig-08.jpg',
-  'images/gallery/ig-09.jpg',
-  'images/gallery/ig-10.jpg',
-  'images/gallery/ig-11.jpg',
-  'images/gallery/ig-12.jpg',
-  'images/gallery/ig-13.jpg',
-  'images/gallery/ig-14.jpg',
-  'images/gallery/ig-15.jpg',
-  'images/gallery/ig-16.jpg',
+  { image: 'images/gallery/ig-01.jpg', url: 'https://www.instagram.com/p/DRBj0eBkYSl/' },
+  { image: 'images/gallery/ig-02.jpg', url: 'https://www.instagram.com/reel/DMDjqIhv-U8/' },
+  { image: 'images/gallery/ig-03.jpg', url: 'https://www.instagram.com/reel/DJIhIgHvUpP/' },
+  { image: 'images/gallery/ig-04.jpg', url: 'https://www.instagram.com/reel/DIfFVOSToXM/' },
+  { image: 'images/gallery/ig-05.jpg', url: 'https://www.instagram.com/p/DGRJEaXTj9E/' },
 ];
 
 const INSTAGRAM_URL = 'https://www.instagram.com/dialedrecords/';
@@ -505,14 +494,15 @@ function renderGallery() {
   const track = document.querySelector('.gallery-track');
   if (!track) return;
 
-  // Duplicate the set so the CSS marquee loops seamlessly
-  [...GALLERY, ...GALLERY].forEach(src => {
+  // Repeat the set so the CSS marquee (-50% loop) has two identical halves
+  // wide enough to cover any viewport
+  [...GALLERY, ...GALLERY, ...GALLERY, ...GALLERY].forEach(post => {
     const item = document.createElement('a');
-    item.href = INSTAGRAM_URL;
+    item.href = post.url;
     item.target = '_blank';
     item.rel = 'noopener noreferrer';
     item.className = 'gallery-item';
-    item.innerHTML = `<img src="${src}" alt="Dialed Records on Instagram" loading="lazy">`;
+    item.innerHTML = `<img src="${post.image}" alt="Dialed Records on Instagram" loading="lazy">`;
     track.appendChild(item);
   });
 }
