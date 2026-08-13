@@ -538,18 +538,21 @@ section { padding: 100px 0; }
 
 #gallery { background: #020202; }
 
+/* Real scroll container: swipeable on touch, JS adds the auto-drift */
 .gallery-marquee {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+
+.gallery-marquee::-webkit-scrollbar { display: none; }
 
 .gallery-track {
   display: flex;
   gap: 14px;
   width: max-content;
-  animation: gallery-scroll 70s linear infinite;
 }
-
-.gallery-track:hover { animation-play-state: paused; }
 
 .gallery-item {
   width: clamp(200px, 24vw, 300px);
@@ -573,13 +576,15 @@ section { padding: 100px 0; }
   opacity: 0.85;
 }
 
-@keyframes gallery-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
+/* Fallback when the GSAP CDN is blocked (private browsing / content
+   blockers): skip the intro and show everything JS would have revealed. */
+.no-anim #page-load { display: none; }
 
-@media (prefers-reduced-motion: reduce) {
-  .gallery-track { animation: none; overflow-x: auto; }
+.no-anim .hero-logo-wrap,
+.no-anim .hero-sub,
+.no-anim .event-item {
+  opacity: 1;
+  transform: none;
 }
 
 

@@ -2,7 +2,14 @@
    DIALED RECORDS — main.js
    ============================================= */
 
-gsap.registerPlugin(ScrollTrigger);
+/* Animations degrade gracefully: if the GSAP CDN is blocked (common in
+   private browsing / content blockers), .no-anim CSS shows everything. */
+const HAS_ANIM = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+if (HAS_ANIM) {
+  gsap.registerPlugin(ScrollTrigger);
+} else {
+  document.documentElement.classList.add('no-anim');
+}
 
 /* ─── DATA ──────────────────────────────────── */
 
@@ -353,7 +360,7 @@ function removeStudioBackground(img) {
 
 /* ─── AMBILIGHT ENGINE ───────────────────────── */
 
-const colorThief = new ColorThief();
+const colorThief = typeof ColorThief !== 'undefined' ? new ColorThief() : null;
 
 function luminance(r, g, b) {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
@@ -379,6 +386,7 @@ function pickGlowColor(palette) {
 }
 
 function applyAmbilight(card, img, isMerch = false) {
+  if (!colorThief) return;
   const run = () => {
     try {
       const palette = colorThief.getPalette(img, 8);
@@ -496,8 +504,7 @@ function renderGallery() {
   const track = document.querySelector('.gallery-track');
   if (!track) return;
 
-  // Repeat the set so the CSS marquee (-50% loop) has two identical halves
-  // wide enough to cover any viewport
+  // Repeat the set so the loop can wrap seamlessly on any viewport width
   [...GALLERY, ...GALLERY, ...GALLERY, ...GALLERY].forEach(post => {
     const item = document.createElement('a');
     item.href = post.url;
@@ -507,6 +514,53 @@ function renderGallery() {
     item.innerHTML = `<img src="${post.image}" alt="Dialed Records on Instagram" loading="lazy">`;
     track.appendChild(item);
   });
+
+  initGalleryScroll();
+}
+
+/* Auto-drifting, swipeable gallery. A real scroll container (works on
+   every phone/browser); JS only nudges scrollLeft, pausing whenever the
+   user interacts, and wraps past the halfway point for an endless loop. */
+function initGalleryScroll() {
+  const scroller = document.querySelector('.gallery-marquee');
+  const track = document.querySelector('.gallery-track');
+  if (!scroller || !track) return;
+
+  const SPEED = 0.04; // px per ms ≈ 40px/s
+  let paused = false;
+  let resumeTimer = null;
+  let pos = 0;
+  let last = null;
+
+  const pause = () => {
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => { paused = false; }, 2500);
+  };
+  ['touchstart', 'pointerdown', 'wheel'].forEach(ev =>
+    scroller.addEventListener(ev, pause, { passive: true })
+  );
+  scroller.addEventListener('mouseenter', () => { paused = true; clearTimeout(resumeTimer); });
+  scroller.addEventListener('mouseleave', () => { paused = false; });
+
+  const autoDrift = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function step(ts) {
+    const half = track.scrollWidth / 2;
+    if (half > 0) {
+      if (paused || !autoDrift) {
+        pos = scroller.scrollLeft; // stay in sync with manual swipes
+      } else {
+        if (last !== null) pos += (ts - last) * SPEED;
+        if (pos >= half) pos -= half;
+        scroller.scrollLeft = pos;
+      }
+      if (scroller.scrollLeft >= half) scroller.scrollLeft -= half;
+    }
+    last = ts;
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 
@@ -567,6 +621,7 @@ function toggleMenu(open) {
   mobileMenu.setAttribute('aria-hidden', String(!open));
   document.body.style.overflow = open ? 'hidden' : '';
 
+  if (!HAS_ANIM) return;
   const spans = burger.querySelectorAll('span');
   if (open) {
     gsap.to(spans[0], { rotate: 45, y: 6, duration: 0.3, ease: 'power2.out' });
@@ -591,6 +646,7 @@ document.querySelectorAll('.mobile-link').forEach(link => {
 /* ─── PAGE LOAD + HERO SEQUENCE ─────────────── */
 
 function startRinging() {
+  if (!HAS_ANIM) return;
   gsap.timeline({ repeat: -1, repeatDelay: 2.8 })
     .to('.hero-logo-wrap', { rotate: -6, x: -5, duration: 0.07, ease: 'none' })
     .to('.hero-logo-wrap', { rotate:  6, x:  5, duration: 0.07, ease: 'none' })
@@ -601,27 +657,30 @@ function startRinging() {
     .to('.hero-logo-wrap', { rotate:  0, x:  0, duration: 0.18, ease: 'power3.out' });
 }
 
-gsap.timeline()
-  // 1 — Splash logo fades in
-  .to('.pl-logo-wrap', { opacity: 1, duration: 0.7, ease: 'power2.out' })
-  // 2 — Hold briefly
-  .to({}, { duration: 0.9 })
-  // 3 — Entire overlay fades to black, then out
-  .to('#page-load', { opacity: 0, duration: 0.8, ease: 'power2.inOut' })
-  .set('#page-load', { display: 'none' })
-  // 4 — Hero logo rises in
-  .to('.hero-logo-wrap', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=0.2')
-  // 5 — Tagline
-  .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
-  // 6 — Nav fades in
-  .from('#nav', { opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
-  // 7 — Start ring loop
-  .add(startRinging);
+if (HAS_ANIM) {
+  gsap.timeline()
+    // 1 — Splash logo fades in
+    .to('.pl-logo-wrap', { opacity: 1, duration: 0.7, ease: 'power2.out' })
+    // 2 — Hold briefly
+    .to({}, { duration: 0.9 })
+    // 3 — Entire overlay fades to black, then out
+    .to('#page-load', { opacity: 0, duration: 0.8, ease: 'power2.inOut' })
+    .set('#page-load', { display: 'none' })
+    // 4 — Hero logo rises in
+    .to('.hero-logo-wrap', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=0.2')
+    // 5 — Tagline
+    .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+    // 6 — Nav fades in
+    .from('#nav', { opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+    // 7 — Start ring loop
+    .add(startRinging);
+}
 
 
 /* ─── SCROLL ANIMATIONS ─────────────────────── */
 
 function initScrollAnims() {
+  if (!HAS_ANIM) return;
   // Section headers — slide up + fade, border expands
   gsap.utils.toArray('.section-header').forEach(el => {
     gsap.from(el, {
