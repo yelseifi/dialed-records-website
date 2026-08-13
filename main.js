@@ -247,11 +247,13 @@ const ALL_EVENTS_URL = 'https://linktr.ee/dialedevents';
 /* Posts from @dialedrecords, newest first — each tile links to its post.
    To add one: save the image in images/gallery/ and add {image, url} here. */
 const GALLERY = [
-  { image: 'images/gallery/ig-01.jpg', url: 'https://www.instagram.com/p/DRBj0eBkYSl/' },
-  { image: 'images/gallery/ig-02.jpg', url: 'https://www.instagram.com/reel/DMDjqIhv-U8/' },
-  { image: 'images/gallery/ig-03.jpg', url: 'https://www.instagram.com/reel/DJIhIgHvUpP/' },
-  { image: 'images/gallery/ig-04.jpg', url: 'https://www.instagram.com/reel/DIfFVOSToXM/' },
-  { image: 'images/gallery/ig-05.jpg', url: 'https://www.instagram.com/p/DGRJEaXTj9E/' },
+  { image: 'images/gallery/ig-01.jpg', url: 'https://www.instagram.com/p/DWCSSeuCTKd/' },
+  { image: 'images/gallery/ig-02.jpg', url: 'https://www.instagram.com/p/DVHt48cAWaY/' },
+  { image: 'images/gallery/ig-03.jpg', url: 'https://www.instagram.com/p/DURlwy0EoZ5/' },
+  { image: 'images/gallery/ig-04.jpg', url: 'https://www.instagram.com/p/DS3XHgFEtTY/' },
+  { image: 'images/gallery/ig-05.jpg', url: 'https://www.instagram.com/p/DQ8PWbCERKl/' },
+  { image: 'images/gallery/ig-06.jpg', url: 'https://www.instagram.com/p/DOCbLRtXO1K/' },
+  { image: 'images/gallery/ig-07.jpg', url: 'https://www.instagram.com/p/DNzB6CNypXx/' },
 ];
 
 const INSTAGRAM_URL = 'https://www.instagram.com/dialedrecords/';
