@@ -247,6 +247,38 @@ const EVENTS = [
     lineup: 'Andrey Pushkarev · H Foundation · Josh Lee · DJ Monico · Whois86',
     link: 'https://posh.vip/e/utopia-fridays-2026-8-22-12-0',
   },
+  {
+    date: 'Sep 4\n2026',
+    name: 'TBA',
+    subtitle: 'Dialed Records Presents',
+    venue: 'Venue TBA · Los Angeles, CA',
+    lineup: 'Lineup TBA',
+    link: '',
+  },
+  {
+    date: 'Oct 2\n2026',
+    name: 'TBA',
+    subtitle: 'Dialed Records Presents',
+    venue: 'Venue TBA · Los Angeles, CA',
+    lineup: 'Lineup TBA',
+    link: '',
+  },
+  {
+    date: 'Oct 31\n2026',
+    name: 'TBA',
+    subtitle: 'Dialed Records Presents',
+    venue: 'Venue TBA · Los Angeles, CA',
+    lineup: 'Lineup TBA',
+    link: '',
+  },
+  {
+    date: 'Dec 3\n2026',
+    name: 'TBA',
+    subtitle: 'Dialed Records Presents',
+    venue: 'Venue TBA · Los Angeles, CA',
+    lineup: 'Lineup TBA',
+    link: '',
+  },
 ];
 
 const ALL_EVENTS_URL = 'https://linktr.ee/dialedevents';
@@ -485,7 +517,9 @@ function renderEvents() {
         <div class="event-lineup">${ev.lineup}</div>
       </div>
       <div class="event-cta">
-        <a href="${ev.link}" target="_blank" rel="noopener">Tickets</a>
+        ${ev.link
+          ? `<a href="${ev.link}" target="_blank" rel="noopener">Tickets</a>`
+          : `<span class="event-cta-tba">Tickets TBA</span>`}
       </div>
     `;
     list.appendChild(item);

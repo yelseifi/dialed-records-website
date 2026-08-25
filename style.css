@@ -433,7 +433,8 @@ section { padding: 100px 0; }
   padding-top: 5px;
 }
 
-.event-cta a {
+.event-cta a,
+.event-cta .event-cta-tba {
   display: inline-block;
   padding: 10px 22px;
   border: 1px solid rgba(255,255,255,0.18);
@@ -444,6 +445,12 @@ section { padding: 100px 0; }
   text-transform: uppercase;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.event-cta .event-cta-tba {
+  color: var(--dim);
+  border-color: rgba(255,255,255,0.10);
+  cursor: default;
 }
 
 .event-cta a:hover {
