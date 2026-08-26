@@ -240,14 +240,6 @@ const MERCH = [
 
 const EVENTS = [
   {
-    date: 'Aug 21\n2026',
-    name: 'Andrey Pushkarev · H Foundation',
-    subtitle: 'Utopia Presents · Dialed Records',
-    venue: 'Utopia · Los Angeles, CA',
-    lineup: 'Andrey Pushkarev · H Foundation · Josh Lee · DJ Monico · Whois86',
-    link: 'https://posh.vip/e/utopia-fridays-2026-8-22-12-0',
-  },
-  {
     date: 'Sep 4\n2026',
     name: 'TBA',
     subtitle: 'Dialed Records Presents',
