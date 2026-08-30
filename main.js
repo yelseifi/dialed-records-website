@@ -241,11 +241,11 @@ const MERCH = [
 const EVENTS = [
   {
     date: 'Sep 4\n2026',
-    name: 'TBA',
-    subtitle: 'Dialed Records Presents',
-    venue: 'Venue TBA · Los Angeles, CA',
-    lineup: 'Lineup TBA',
-    link: '',
+    name: 'Mai Iachetti · JNJS',
+    subtitle: 'Dialed Records x The Cut Presents',
+    venue: 'Utopia · Los Angeles, CA',
+    lineup: 'Full lineup TBA',
+    link: 'https://posh.vip/e/utopia-fridays-2026-9-5-12-0',
   },
   {
     date: 'Oct 2\n2026',
