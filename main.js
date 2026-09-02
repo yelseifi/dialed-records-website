@@ -244,7 +244,7 @@ const EVENTS = [
     name: 'Mai Iachetti · JNJS',
     subtitle: 'Dialed Records x The Cut Presents',
     venue: 'Utopia · Los Angeles, CA',
-    lineup: 'Full lineup TBA',
+    lineup: '',
     link: 'https://posh.vip/e/utopia-fridays-2026-9-5-12-0',
   },
   {
@@ -506,7 +506,7 @@ function renderEvents() {
         <div class="event-name">${ev.name}</div>
         <div class="event-subtitle">${ev.subtitle}</div>
         <div class="event-venue">${ev.venue}</div>
-        <div class="event-lineup">${ev.lineup}</div>
+        ${ev.lineup ? `<div class="event-lineup">${ev.lineup}</div>` : ''}
       </div>
       <div class="event-cta">
         ${ev.link
