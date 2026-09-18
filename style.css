@@ -709,7 +709,26 @@ section { padding: 100px 0; }
 
 /* ─── GALLERY MARQUEE ─────────────────────── */
 
-#gallery { background: #020202; }
+/* A slim film-strip interlude between Merch and About, not a full section:
+   caption-sized header, small tiles, and edges that dissolve into the black
+   instead of being chopped by the viewport. */
+#gallery {
+  background: #020202;
+  padding: 56px 0 64px;
+}
+
+#gallery .section-header {
+  margin-bottom: 22px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+#gallery .section-header h2 {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
 
 /* Real scroll container: swipeable on touch, JS adds the auto-drift */
 .gallery-marquee {
@@ -717,19 +736,21 @@ section { padding: 100px 0; }
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+          mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
 }
 
 .gallery-marquee::-webkit-scrollbar { display: none; }
 
 .gallery-track {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   width: max-content;
 }
 
 .gallery-item {
-  width: clamp(200px, 24vw, 300px);
-  height: clamp(200px, 24vw, 300px);
+  width: clamp(132px, 15vw, 190px);
+  height: clamp(132px, 15vw, 190px);
   flex: none;
   border-radius: var(--radius);
   overflow: hidden;
