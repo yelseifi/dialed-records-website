@@ -610,6 +610,21 @@ section { padding: 100px 0; }
   border-color: var(--white);
 }
 
+.events-past-label {
+  margin-top: 72px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Dimmed through colour, not opacity — the scroll animation owns opacity. */
+.event-item--past .event-name { color: var(--dim); }
+.event-item--past .event-venue { color: rgba(255,255,255,0.28); }
+
 .events-empty {
   font-family: var(--mono);
   font-size: 12px;

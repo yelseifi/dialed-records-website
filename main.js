@@ -254,6 +254,9 @@ const MERCH = [
   },
 ];
 
+/* Keep these in date order. Once a date passes, the event moves itself to
+   "Past Events" and its button becomes Recap → `recap` (an Instagram post URL);
+   no `recap` yet means no button. */
 const EVENTS = [
   {
     date: 'Sep 4\n2026',
@@ -262,6 +265,7 @@ const EVENTS = [
     venue: 'Utopia · Los Angeles, CA',
     lineup: '',
     link: 'https://posh.vip/e/utopia-fridays-2026-9-5-12-0',
+    recap: '', // Instagram recap post
   },
   {
     date: 'Oct 2\n2026',
@@ -535,22 +539,51 @@ function renderDrop() {
   `;
   hero.insertBefore(drop, hero.querySelector('.scroll-indicator'));
   hero.classList.add('has-drop');
+
+  // The drop is an opening moment, not a fixture: once the hero has scrolled
+  // out of view it's swapped for the logo, so that's what's there on the way back up.
+  new IntersectionObserver((entries, io) => {
+    if (entries[0].isIntersecting) return;
+    io.disconnect();
+    drop.remove();
+    hero.classList.remove('has-drop');
+    if (HAS_ANIM) {
+      gsap.set('.hero-logo-wrap, .hero-sub', { opacity: 1, y: 0 });
+      startRinging();
+    }
+  }).observe(hero);
+
   return true;
 }
 
 
 /* ─── RENDER: EVENTS ────────────────────────── */
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/* Nights run past midnight, so an event stays "upcoming" until noon the day after. */
+function isPastEvent(ev) {
+  const [monthDay, year] = ev.date.split('\n');
+  const [month, day] = monthDay.split(' ');
+  const noonAfter = new Date(Number(year), MONTHS.indexOf(month), Number(day) + 1, 12);
+  return new Date() > noonAfter;
+}
+
 function renderEvents() {
   const list = document.querySelector('.events-list');
+  const upcoming = EVENTS.filter(ev => !isPastEvent(ev));
+  const past = EVENTS.filter(isPastEvent).reverse(); // most recent first
 
-  if (!EVENTS.length) {
+  if (!upcoming.length) {
     list.innerHTML = '<p class="events-empty">No upcoming events. Check back soon.</p>';
   }
 
-  EVENTS.forEach(ev => {
+  const addItem = (ev, isPast) => {
+    // Past events trade the ticket link for the Instagram recap, once there is one.
+    const href = isPast ? ev.recap : ev.link;
+    const label = isPast ? 'Recap' : 'Tickets';
     const item = document.createElement('div');
-    item.className = 'event-item';
+    item.className = isPast ? 'event-item event-item--past' : 'event-item';
     item.innerHTML = `
       <div class="event-date">${ev.date.replace('\n', '<br>')}</div>
       <div class="event-body">
@@ -560,18 +593,28 @@ function renderEvents() {
         ${ev.lineup ? `<div class="event-lineup">${ev.lineup}</div>` : ''}
       </div>
       <div class="event-cta">
-        ${ev.link
-          ? `<a href="${ev.link}" target="_blank" rel="noopener">Tickets</a>`
-          : `<span class="event-cta-tba">Tickets TBA</span>`}
+        ${href
+          ? `<a href="${href}" target="_blank" rel="noopener">${label}</a>`
+          : isPast ? '' : `<span class="event-cta-tba">Tickets TBA</span>`}
       </div>
     `;
     list.appendChild(item);
-  });
+  };
+
+  upcoming.forEach(ev => addItem(ev, false));
 
   const cta = document.createElement('div');
   cta.className = 'events-all-cta';
   cta.innerHTML = `<a href="${ALL_EVENTS_URL}" target="_blank" rel="noopener">Tickets + All Events ↗</a>`;
   list.appendChild(cta);
+
+  if (past.length) {
+    const label = document.createElement('div');
+    label.className = 'events-past-label';
+    label.textContent = 'Past Events';
+    list.appendChild(label);
+    past.forEach(ev => addItem(ev, true));
+  }
 }
 
 
