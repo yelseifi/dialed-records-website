@@ -260,6 +260,33 @@ const MERCH = [
    no `recap` yet means no button. */
 const EVENTS = [
   {
+    date: 'Mar 26\n2026',
+    name: 'Beatport Live — The Block',
+    subtitle: 'Dialed Records Takeover',
+    venue: 'Toe Jam · Miami, FL',
+    lineup: 'Dan Ghenacia b2b m.O.N.R.O.E. · Richy Ahmed · Josh Lee b2b Shane Kwon · Whois86 b2b SIMMI',
+    link: '',
+    recap: '',
+  },
+  {
+    date: 'May 23\n2026',
+    name: 'Seb Zito · Politics Of Dancing',
+    subtitle: 'Dialed Records Label Showcase',
+    venue: 'Detour · Los Angeles, CA',
+    lineup: 'Seb Zito · Politics Of Dancing · Sami Sebastian',
+    link: '',
+    recap: '',
+  },
+  {
+    date: 'Aug 21\n2026',
+    name: 'Andrey Pushkarev · H Foundation',
+    subtitle: 'Utopia Presents · Dialed Records',
+    venue: 'Utopia · Los Angeles, CA',
+    lineup: 'Andrey Pushkarev · H Foundation · Josh Lee · DJ Monico · Whois86',
+    link: '',
+    recap: '',
+  },
+  {
     date: 'Sep 4\n2026',
     name: 'Mai Iachetti · JNJS',
     subtitle: 'Dialed Records x The Cut Presents',
