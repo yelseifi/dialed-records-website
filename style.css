@@ -340,6 +340,7 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.4em;
   margin-right: -0.4em; /* trailing tracking would push it off-centre */
 }
+.drop-label { color: var(--dim); }
 .drop-title {
   margin-top: 9px;
   font-size: 10px;

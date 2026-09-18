@@ -20,6 +20,7 @@ const FEATURED = {
   catalog: 'DRX026',
   image: 'images/release-drx026-lg.jpg',
   until: '2026-10-16',
+  label: 'Out Now', // sits beside the catalog code; '' for none
   holdSeconds: 30, // how long the light stays on before handing back to the logo
 };
 
@@ -560,7 +561,7 @@ function renderDrop() {
       <img class="drop-art" src="${FEATURED.image || rel.image}" alt="${rel.title} — ${rel.artist}" fetchpriority="high">
     </span>
     <span class="drop-meta">
-      <span class="drop-code">${rel.catalog}</span>
+      <span class="drop-code">${rel.catalog}${FEATURED.label ? `<span class="drop-label"> · ${FEATURED.label}</span>` : ''}</span>
       <span class="drop-title">${rel.artist} · ${rel.title}</span>
     </span>
     <span class="drop-cue"><span class="drop-cue-inner">
