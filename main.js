@@ -15,6 +15,13 @@ if (HAS_ANIM) {
 
 const RELEASES = [
   {
+    catalog: 'DRX026',
+    title: 'Nuthin Better',
+    artist: 'Pirate Copy',
+    image: 'images/release-drx026.jpg',
+    beatport: 'https://lnk.to/ew8mDOAW',
+  },
+  {
     catalog: 'DRX025',
     title: 'Guess U Know?',
     artist: 'Joe Allen',
