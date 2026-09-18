@@ -20,6 +20,7 @@ const FEATURED = {
   catalog: 'DRX026',
   image: 'images/release-drx026-lg.jpg',
   until: '2026-10-16',
+  holdSeconds: 30, // how long the light stays on before handing back to the logo
 };
 
 const RELEASES = [
@@ -511,10 +512,13 @@ function renderReleases() {
 /* ─── RENDER: FEATURED DROP ─────────────────── */
 
 function renderDrop() {
-  if (!FEATURED) return false;
-  if (FEATURED.until && new Date() > new Date(`${FEATURED.until}T23:59:59`)) return false;
+  if (!FEATURED) return null;
+  if (FEATURED.until && new Date() > new Date(`${FEATURED.until}T23:59:59`)) return null;
   const rel = RELEASES.find(r => r.catalog === FEATURED.catalog);
-  if (!rel) return false;
+  if (!rel) return null;
+  // Clicked through earlier in this tab: if the page reloads on the way back
+  // (in-app browsers do this), land on the logo rather than replaying the drop.
+  try { if (sessionStorage.getItem('dropClicked') === rel.catalog) return null; } catch (e) {}
 
   const hero = document.querySelector('#hero');
   const drop = document.createElement('a');
@@ -540,20 +544,51 @@ function renderDrop() {
   hero.insertBefore(drop, hero.querySelector('.scroll-indicator'));
   hero.classList.add('has-drop');
 
-  // The drop is an opening moment, not a fixture: once the hero has scrolled
-  // out of view it's swapped for the logo, so that's what's there on the way back up.
-  new IntersectionObserver((entries, io) => {
-    if (entries[0].isIntersecting) return;
+  // The drop is an opening moment, not a fixture. It always ends on the logo,
+  // by whichever comes first: scrolling on, clicking through, or the clock.
+  // `lightsOut` is for when someone's watching; otherwise the swap is unseen.
+  let ended = false;
+  let clock;
+  const end = (lightsOut) => {
+    if (ended) return;
+    ended = true;
+    clearTimeout(clock);
     io.disconnect();
-    drop.remove();
-    hero.classList.remove('has-drop');
-    if (HAS_ANIM) {
+    const swap = () => {
+      drop.remove();
+      hero.classList.remove('has-drop');
+    };
+    if (!HAS_ANIM) return swap();
+    if (!lightsOut) {
+      swap();
       gsap.set('.hero-logo-wrap, .hero-sub', { opacity: 1, y: 0 });
-      startRinging();
+      return startRinging();
     }
-  }).observe(hero);
+    gsap.timeline()
+      .to('.drop-stage, .drop-meta, .drop-cue', { opacity: 0, duration: 1.1, ease: 'power2.inOut' })
+      .to('.drop-beam', { opacity: 0, duration: 0.9, ease: 'power2.in' }, '-=0.4')
+      .add(swap)
+      .to('.hero-logo-wrap', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '+=0.2')
+      .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+      .add(startRinging);
+  };
 
-  return true;
+  const io = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) end(false);
+  });
+  io.observe(hero);
+
+  drop.addEventListener('click', () => {
+    try { sessionStorage.setItem('dropClicked', rel.catalog); } catch (e) {}
+    // Swap while the new tab has focus. If the page never gets hidden (link
+    // opened in a window alongside), fade out instead of cutting.
+    document.addEventListener('visibilitychange', () => end(false), { once: true });
+    setTimeout(() => end(!document.hidden), 1500);
+  });
+
+  return {
+    startClock: () => { clock = setTimeout(() => end(!document.hidden), (FEATURED.holdSeconds || 30) * 1000); },
+  };
 }
 
 
@@ -778,7 +813,9 @@ function startRinging() {
 }
 
 // The drop has to be in the DOM before the intro timeline resolves its targets.
-const HAS_DROP = renderDrop();
+const DROP = renderDrop();
+const HAS_DROP = !!DROP;
+if (HAS_DROP && !HAS_ANIM) DROP.startClock();
 
 if (HAS_ANIM) {
   const intro = gsap.timeline()
@@ -802,7 +839,8 @@ if (HAS_ANIM) {
       .to('.drop-stage', { opacity: 1, duration: 2, ease: 'power2.out' }, '-=0.9')
       // 6 — Catalog line, then the cue
       .to('.drop-meta', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, '-=1')
-      .to('.drop-cue', { opacity: 1, duration: 1.2, ease: 'power2.out' }, '-=0.2');
+      .to('.drop-cue', { opacity: 1, duration: 1.2, ease: 'power2.out' }, '-=0.2')
+      .add(DROP.startClock);
   } else {
     intro
       // 4 — Hero logo rises in
