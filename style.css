@@ -241,6 +241,157 @@ img { max-width: 100%; display: block; }
 }
 
 
+/* ─── FEATURED DROP ───────────────────────────
+   Hero takeover, driven by FEATURED in main.js. The artwork is treated as an
+   object in a dark room: its square edges are masked away, and the light is
+   built from layers — beam, top light, floor pool, falloff. */
+
+#hero.has-drop { --drop: min(54dvh, 80vw, 560px); }
+#hero.has-drop .hero-content { display: none; }
+
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px; /* optical: clears the nav */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Beam: the cone is clipped on ::before and blurred on the parent, because
+   filter runs before clip-path on the same element and would leave hard edges. */
+.drop-beam {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - var(--drop) * 0.88);
+  width: calc(var(--drop) * 1.35);
+  height: calc(50dvh + var(--drop) * 0.38);
+  transform: translateX(-50%);
+  filter: blur(20px);
+  pointer-events: none;
+  opacity: 0;
+}
+.drop-beam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%);
+  background:
+    radial-gradient(ellipse 22% 10% at 50% 0%, rgba(255,250,242,0.5), transparent 100%),
+    linear-gradient(to bottom, rgba(255,250,242,0.2) 0%, rgba(255,250,242,0.07) 55%, transparent 100%);
+  opacity: 0.8;
+  transition: opacity 0.9s ease;
+}
+
+/* The mask sits on the stage, not the image, so the light layers below blend
+   with the artwork only — never with the beam behind it, which would redraw
+   the square. It has to hit full transparency before the box edge. */
+.drop-stage {
+  position: relative;
+  width: var(--drop);
+  aspect-ratio: 1;
+  isolation: isolate;
+  -webkit-mask-image: radial-gradient(ellipse 70% 72% at 50% 50%, #000 42%, transparent 67%);
+          mask-image: radial-gradient(ellipse 70% 72% at 50% 50%, #000 42%, transparent 67%);
+  opacity: 0;
+}
+.drop-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(1.12) contrast(1.04);
+  transition: filter 0.9s ease;
+}
+/* Top light landing on the object, and a pool of it on the floor */
+.drop-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 55% 46% at 50% 6%, rgba(255,250,242,0.5), transparent 72%),
+    radial-gradient(ellipse 58% 9% at 50% 87%, rgba(255,250,242,0.22), transparent 100%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+/* Falloff: the light dies toward the floor and the edges */
+.drop-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse 72% 78% at 50% 34%, transparent 50%, rgba(0,0,0,0.45) 100%);
+  pointer-events: none;
+}
+
+.drop-meta {
+  margin-top: -2px;
+  text-align: center;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(8px);
+}
+.drop-code,
+.drop-title { display: block; }
+.drop-code {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  margin-right: -0.4em; /* trailing tracking would push it off-centre */
+}
+.drop-title {
+  margin-top: 9px;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  margin-right: -0.3em;
+  color: var(--dim);
+}
+
+.drop-cue {
+  margin-top: 26px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  opacity: 0;
+}
+.drop-cue-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  animation: drop-cue 3.6s ease-in-out infinite;
+}
+.drop-cue-word { margin-right: -0.4em; }
+.drop-cue-word::after { content: 'Click'; }
+@media (hover: none) {
+  .drop-cue-word::after { content: 'Tap'; }
+}
+
+@keyframes drop-cue {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 0.9; }
+}
+
+/* The light comes up a touch when you reach for it */
+@media (hover: hover) {
+  .drop:hover .drop-art { filter: brightness(1.3) contrast(1.04); }
+  .drop:hover .drop-beam::before { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-cue-inner { animation: none; opacity: 0.6; }
+}
+
+.no-anim .drop-beam,
+.no-anim .drop-stage,
+.no-anim .drop-meta,
+.no-anim .drop-cue { opacity: 1; }
+.no-anim .drop-meta { transform: none; }
+
+
 /* ─── SECTIONS ────────────────────────────── */
 
 section { padding: 100px 0; }

@@ -13,6 +13,15 @@ if (HAS_ANIM) {
 
 /* ─── DATA ──────────────────────────────────── */
 
+/* Featured drop — takes over the hero: the artwork alone in the dark under a
+   top-down spotlight. Points at a RELEASES entry by catalog. After `until`
+   (YYYY-MM-DD) the hero goes back to the logo on its own; null turns it off. */
+const FEATURED = {
+  catalog: 'DRX026',
+  image: 'images/release-drx026-lg.jpg',
+  until: '2026-10-16',
+};
+
 const RELEASES = [
   {
     catalog: 'DRX026',
@@ -495,6 +504,41 @@ function renderReleases() {
 }
 
 
+/* ─── RENDER: FEATURED DROP ─────────────────── */
+
+function renderDrop() {
+  if (!FEATURED) return false;
+  if (FEATURED.until && new Date() > new Date(`${FEATURED.until}T23:59:59`)) return false;
+  const rel = RELEASES.find(r => r.catalog === FEATURED.catalog);
+  if (!rel) return false;
+
+  const hero = document.querySelector('#hero');
+  const drop = document.createElement('a');
+  drop.className = 'drop';
+  drop.href = rel.beatport;
+  drop.target = '_blank';
+  drop.rel = 'noopener';
+  drop.setAttribute('aria-label', `Listen to ${rel.title} by ${rel.artist}`);
+  drop.innerHTML = `
+    <span class="drop-beam"></span>
+    <span class="drop-stage">
+      <img class="drop-art" src="${FEATURED.image || rel.image}" alt="${rel.title} — ${rel.artist}" fetchpriority="high">
+    </span>
+    <span class="drop-meta">
+      <span class="drop-code">${rel.catalog}</span>
+      <span class="drop-title">${rel.artist} · ${rel.title}</span>
+    </span>
+    <span class="drop-cue"><span class="drop-cue-inner">
+      <span class="drop-cue-arrow">↑</span>
+      <span class="drop-cue-word"></span>
+    </span></span>
+  `;
+  hero.insertBefore(drop, hero.querySelector('.scroll-indicator'));
+  hero.classList.add('has-drop');
+  return true;
+}
+
+
 /* ─── RENDER: EVENTS ────────────────────────── */
 
 function renderEvents() {
@@ -690,23 +734,43 @@ function startRinging() {
     .to('.hero-logo-wrap', { rotate:  0, x:  0, duration: 0.18, ease: 'power3.out' });
 }
 
+// The drop has to be in the DOM before the intro timeline resolves its targets.
+const HAS_DROP = renderDrop();
+
 if (HAS_ANIM) {
-  gsap.timeline()
+  const intro = gsap.timeline()
     // 1 — Splash logo fades in
     .to('.pl-logo-wrap', { opacity: 1, duration: 0.7, ease: 'power2.out' })
     // 2 — Hold briefly
     .to({}, { duration: 0.9 })
     // 3 — Entire overlay fades to black, then out
     .to('#page-load', { opacity: 0, duration: 0.8, ease: 'power2.inOut' })
-    .set('#page-load', { display: 'none' })
-    // 4 — Hero logo rises in
-    .to('.hero-logo-wrap', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=0.2')
-    // 5 — Tagline
-    .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
-    // 6 — Nav fades in
-    .from('#nav', { opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
-    // 7 — Start ring loop
-    .add(startRinging);
+    .set('#page-load', { display: 'none' });
+
+  if (HAS_DROP) {
+    intro
+      // 4 — Spotlight stutters on like a cold bulb, then holds
+      .to('.drop-beam', { opacity: 0.6, duration: 0.05, ease: 'none' })
+      .to('.drop-beam', { opacity: 0.08, duration: 0.1, ease: 'none' })
+      .to('.drop-beam', { opacity: 0.85, duration: 0.05, ease: 'none' })
+      .to('.drop-beam', { opacity: 0.25, duration: 0.14, ease: 'none' })
+      .to('.drop-beam', { opacity: 1, duration: 1, ease: 'power2.out' })
+      // 5 — Artwork comes up out of the dark
+      .to('.drop-stage', { opacity: 1, duration: 2, ease: 'power2.out' }, '-=0.9')
+      // 6 — Catalog line, then the cue
+      .to('.drop-meta', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, '-=1')
+      .to('.drop-cue', { opacity: 1, duration: 1.2, ease: 'power2.out' }, '-=0.2');
+  } else {
+    intro
+      // 4 — Hero logo rises in
+      .to('.hero-logo-wrap', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, '-=0.2')
+      // 5 — Tagline
+      .to('.hero-sub', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5');
+  }
+
+  // Nav fades in
+  intro.from('#nav', { opacity: 0, duration: 0.6, ease: 'power2.out' }, HAS_DROP ? '-=1.6' : '-=0.4');
+  if (!HAS_DROP) intro.add(startRinging);
 }
 
 
