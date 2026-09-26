@@ -279,6 +279,15 @@ const EVENTS = [
     recap: '',
   },
   {
+    date: 'Jul 24\n2026',
+    name: 'Rich NxT · Nu Zau',
+    subtitle: 'Utopia Presents · Dialed Records',
+    venue: 'Utopia · Los Angeles, CA',
+    lineup: 'Rich NxT · Nu Zau · TXHLDEM',
+    link: '',
+    recap: '',
+  },
+  {
     date: 'Aug 21\n2026',
     name: 'Andrey Pushkarev · H Foundation',
     subtitle: 'Utopia Presents · Dialed Records',
