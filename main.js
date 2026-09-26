@@ -298,11 +298,12 @@ const EVENTS = [
   },
   {
     date: 'Oct 2\n2026',
-    name: 'TBA',
+    name: 'Rich NxT',
     subtitle: 'Dialed Records Presents',
-    venue: 'Venue TBA · Los Angeles, CA',
-    lineup: 'Lineup TBA',
-    link: '',
+    venue: 'Utopia · Los Angeles, CA',
+    lineup: 'Rich NxT · B.Love · Shane Kwon',
+    link: 'https://linktr.ee/dialedevents', // swap for the Posh link once confirmed
+    recap: '',
   },
   {
     date: 'Oct 31\n2026',
