@@ -298,11 +298,11 @@ const EVENTS = [
   },
   {
     date: 'Oct 2\n2026',
-    name: 'Rich NxT',
-    subtitle: 'Dialed Records Presents',
+    name: 'Jay Tripwire · B.Love',
+    subtitle: 'Utopia Presents · Dialed Records',
     venue: 'Utopia · Los Angeles, CA',
-    lineup: 'Rich NxT · B.Love · Shane Kwon',
-    link: 'https://linktr.ee/dialedevents', // swap for the Posh link once confirmed
+    lineup: 'Jay Tripwire · B.Love · Shane Kwon b2b Kosta',
+    link: 'https://notapromoter.com/discover/aLsQZG88PRsCSAoKKz3h',
     recap: '',
   },
   {
