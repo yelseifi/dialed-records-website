@@ -17,14 +17,21 @@ if (HAS_ANIM) {
    top-down spotlight. Points at a RELEASES entry by catalog. After `until`
    (YYYY-MM-DD) the hero goes back to the logo on its own; null turns it off. */
 const FEATURED = {
-  catalog: 'DRX026',
-  image: 'images/release-drx026-lg.jpg',
-  until: '2026-10-16',
+  catalog: 'DRX027',
+  image: 'images/release-drx027-lg.jpg',
+  until: '2026-11-09',
   label: 'Out Now', // sits beside the catalog code; '' for none
   holdSeconds: 30, // how long the light stays on before handing back to the logo
 };
 
 const RELEASES = [
+  {
+    catalog: 'DRX027',
+    title: '5 Second Countdown',
+    artist: 'TROXY',
+    image: 'images/release-drx027.jpg',
+    beatport: 'https://lnk.to/1liCUL',
+  },
   {
     catalog: 'DRX026',
     title: 'Nuthin Better',
