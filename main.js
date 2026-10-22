@@ -17,14 +17,21 @@ if (HAS_ANIM) {
    top-down spotlight. Points at a RELEASES entry by catalog. After `until`
    (YYYY-MM-DD) the hero goes back to the logo on its own; null turns it off. */
 const FEATURED = {
-  catalog: 'DRX027',
-  image: 'images/release-drx027-lg.jpg',
-  until: '2026-11-09',
+  catalog: 'DRX028',
+  image: 'images/release-drx028-lg.jpg',
+  until: '2026-11-18',
   label: 'Out Now', // sits beside the catalog code; '' for none
   holdSeconds: 30, // how long the light stays on before handing back to the logo
 };
 
 const RELEASES = [
+  {
+    catalog: 'DRX028',
+    title: 'Desires Ignite',
+    artist: 'Reber',
+    image: 'images/release-drx028.jpg',
+    beatport: 'https://lnk.to/otIt2m',
+  },
   {
     catalog: 'DRX027',
     title: '5 Second Countdown',
