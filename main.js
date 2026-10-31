@@ -330,19 +330,21 @@ const EVENTS = [
   },
   {
     date: 'Oct 31\n2026',
-    name: 'TBA',
-    subtitle: 'Dialed Records Presents',
-    venue: 'Venue TBA · Los Angeles, CA',
-    lineup: 'Lineup TBA',
-    link: '',
+    name: 'Voigtmann · Per Hammar',
+    subtitle: 'Sunday Sessions LA x Dialed Records',
+    venue: 'Wonzimer · Los Angeles, CA',
+    lineup: '',
+    link: 'https://linktr.ee/dialedevents', // swap for the ticket link once there is one
+    recap: '',
   },
   {
     date: 'Dec 3\n2026',
     name: 'TBA',
     subtitle: 'Dialed Records Presents',
-    venue: 'Venue TBA · Los Angeles, CA',
+    venue: 'Venue TBA · Miami, FL',
     lineup: 'Lineup TBA',
     link: '',
+    recap: '',
   },
 ];
 
