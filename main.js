@@ -17,14 +17,22 @@ if (HAS_ANIM) {
    top-down spotlight. Points at a RELEASES entry by catalog. After `until`
    (YYYY-MM-DD) the hero goes back to the logo on its own; null turns it off. */
 const FEATURED = {
-  catalog: 'DRX028',
-  image: 'images/release-drx028-lg.jpg',
-  until: '2026-11-18',
+  catalog: 'DRX029',
+  image: 'images/release-drx029-lg.jpg',
+  out: '2026-11-20', // release day: the label reads "Out Nov 20" before it, then `label`
+  until: '2026-12-18',
   label: 'Out Now', // sits beside the catalog code; '' for none
   holdSeconds: 30, // how long the light stays on before handing back to the logo
 };
 
 const RELEASES = [
+  {
+    catalog: 'DRX029',
+    title: 'Groove Control',
+    artist: 'Sublee',
+    image: 'images/release-drx029.jpg',
+    beatport: 'https://lnk.to/sVZRoI',
+  },
   {
     catalog: 'DRX028',
     title: 'Desires Ignite',
@@ -339,11 +347,11 @@ const EVENTS = [
   },
   {
     date: 'Dec 3\n2026',
-    name: 'TBA',
-    subtitle: 'Dialed Records Presents',
-    venue: 'Venue TBA · Miami, FL',
-    lineup: 'Lineup TBA',
-    link: '',
+    name: 'Alci · Anthea · Priku',
+    subtitle: 'Dialed Records Art Basel',
+    venue: 'Sable · Miami, FL',
+    lineup: 'Alci · Anthea · Priku · Josh Lee',
+    link: 'https://notapromoter.com/discover/x1fAERcOUtILOpMgFhpG',
     recap: '',
   },
 ];
@@ -574,6 +582,11 @@ function renderDrop() {
   // (in-app browsers do this), land on the logo rather than replaying the drop.
   try { if (sessionStorage.getItem('dropClicked') === rel.catalog) return null; } catch (e) {}
 
+  const preRelease = FEATURED.out && new Date() < new Date(`${FEATURED.out}T00:00:00`);
+  const label = preRelease
+    ? `Out ${new Date(FEATURED.out).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}`
+    : FEATURED.label;
+
   const hero = document.querySelector('#hero');
   const drop = document.createElement('a');
   drop.className = 'drop';
@@ -587,7 +600,7 @@ function renderDrop() {
       <img class="drop-art" src="${FEATURED.image || rel.image}" alt="${rel.title} — ${rel.artist}" fetchpriority="high">
     </span>
     <span class="drop-meta">
-      <span class="drop-code">${rel.catalog}${FEATURED.label ? `<span class="drop-label"> · ${FEATURED.label}</span>` : ''}</span>
+      <span class="drop-code">${rel.catalog}${label ? `<span class="drop-label"> · ${label}</span>` : ''}</span>
       <span class="drop-title">${rel.artist} · ${rel.title}</span>
     </span>
     <span class="drop-cue"><span class="drop-cue-inner">
