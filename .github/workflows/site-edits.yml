@@ -6,6 +6,8 @@
 #      "Create a PR" link. Vercel posts a preview of the site on the PR.
 #   3. Merge the PR and it's live. Close it instead and nothing changes.
 #   To tweak before merging, comment on the PR ("make the subtitle ...").
+#   The chat page at /studio (api/studio.js) does all of this for you, so
+#   nobody has to open GitHub.
 #
 # Needs two things set up once, by the repo owner:
 #   1. The Claude GitHub app installed on this repo: https://github.com/apps/claude
@@ -23,11 +25,13 @@ jobs:
   claude:
     # Public repo: only people added to it can start a run, and never bots
     # (Claude's own replies and Vercel's comments would otherwise loop).
-    # The action checks write access again itself.
+    # The action checks write access again itself. Studio notes ("Undone.")
+    # are for the chat, not requests.
     if: >-
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
         github.event.comment.author_association || github.event.issue.author_association) &&
-      (github.event.comment.user.type || github.event.issue.user.type) != 'Bot'
+      (github.event.comment.user.type || github.event.issue.user.type) != 'Bot' &&
+      !contains(github.event.comment.body, '<!-- studio-note -->')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
@@ -38,6 +42,8 @@ jobs:
       issues: write
       id-token: write
       actions: read
+    env:
+      NODE_PATH: ${{ github.workspace }}/../check-deps/node_modules
     steps:
       - uses: actions/checkout@v6
         with:
@@ -49,16 +55,32 @@ jobs:
           python-version: '3.12'
       - run: pip install pillow numpy scipy
 
-      - uses: anthropics/claude-code-action@v1
+      # For tools/check-site.js, which the bot runs before every commit.
+      - run: npm install --prefix "$GITHUB_WORKSPACE/../check-deps" --no-save --no-package-lock --no-audit --no-fund puppeteer-core@25.15.0
+
+      # Pinned: the studio reads this action's comments, so its format must
+      # not change under us. Upgrade on purpose, and test the studio after.
+      - uses: anthropics/claude-code-action@4a0465fcf999da98c6ba185172bf18ddf1a85003 # v1.0.275
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # track_progress + prompt = respond to every message (no trigger
           # word) with the usual progress comment, branch and PR link.
           track_progress: true
+          # Lets it read why a check failed on its change.
+          additional_permissions: |
+            actions: read
+          # Public repo: anyone can comment, so the bot only reads comments
+          # from the owner (the studio posts as the owner), itself, and the
+          # site check's notes. Add a username here for anyone else who
+          # edits through GitHub directly.
+          include_comments_by_actor: ${{ github.repository_owner }},claude[bot],github-actions[bot]
           prompt: |
             This repo has no trigger word. The issue or comment that started this run is the request, written the way the Dialed team would text it ("add this event...", "new release, here's the link"). Ignore any mention of a trigger phrase above.
-            Follow CLAUDE.md. Do the research yourself, make only the change that was asked for, and run `node --check main.js` before committing.
+            Follow CLAUDE.md. Do the research yourself, make only the change that was asked for, and run `node tools/check-site.js` before committing. Don't commit until it passes.
+            If the message says the site check failed, read the failing check on this pull request with your CI tools, fix the cause, and run `node tools/check-site.js` again.
             Reply short and in plain words, like a text back: what you changed, and anything you couldn't confirm. No code in the reply.
             If the message is a question or just a comment, answer it and change nothing.
+            Most messages come from the Dialed Studio chat on the website (dialed-records.com/studio), where the person only sees your final reply, as a chat bubble. So never mention GitHub, issues, branches, pull requests or commits. When you've made a change, end with: "Check the preview, then tap Put it live."
+            Photos arrive as raw.githubusercontent.com links on the studio-uploads branch. Download them with curl and look at them. They're references, like a flyer or a cover: only turn one into a site asset when CLAUDE.md says to, and never commit the original.
           claude_args: |
-            --allowedTools "Bash(curl:*),Bash(python3:*),Bash(node --check:*),WebFetch,WebSearch"
+            --allowedTools "Bash(curl:*),Bash(python3:*),Bash(node --check:*),Bash(node tools/check-site.js:*),WebFetch,WebSearch"
