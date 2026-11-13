@@ -228,7 +228,10 @@ function toMessage(c) {
       return { ...base, from: 'bot', error: true, text: 'That one timed out on my end.' };
     }
     const error = /^\*\*Claude encountered an error/m.test(body);
-    return { ...base, from: 'bot', error, text: replyText(body) || (error ? 'Something went wrong on my end.' : 'Done.') };
+    // A run that failed early still carries the action's opening line.
+    const said = replyText(body);
+    const reply = said && !/^I[’']ll analyze this and get back to you\.?$/i.test(said) ? said : '';
+    return { ...base, from: 'bot', error, text: reply || (error ? 'Something went wrong on my end.' : 'Done.') };
   }
   const fix = body.match(AUTOFIX);
   if (fix) return { ...base, from: 'note', request: true, fixFor: fix[1], text: 'Found a problem with that change. Fixing it…' };

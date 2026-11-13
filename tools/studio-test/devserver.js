@@ -93,7 +93,7 @@ async function simulateBot(target, text, title) {
   if (/\?\s*$/.test(text) || /^what|^when|^is /i.test(text)) {
     c.body = `${head}\n\n---\n### Todo List\n- [x] Read the request\n\nThe next event on the site is **Dec 3**: Alci · Anthea · Priku at Sable, Miami.`;
   } else if (/fail/i.test(text) && !/site check/i.test(text)) {
-    c.body = `**Claude encountered an error after 12s** —— [View job](https://github.com/x/actions/runs/1)\n\n\`\`\`\nboom\n\`\`\`\n\n---\n`;
+    c.body = `**Claude encountered an error after 12s** —— [View job](https://github.com/x/actions/runs/1)\n\n---\nI'll analyze this and get back to you.\n`; // as the real action leaves it
   } else {
     const sha = `sha-${++did}`;
     const fixing = /autofix:|site check/i.test(text);

@@ -122,6 +122,7 @@ async function scenario(name, env, fn) {
     const { body: { chat } } = await r.call('POST', { action: 'send', text: 'this one will fail' });
     const idle = await until(r, chat, 'idle');
     expect('error bubble + try again', idle.canRetry && idle.messages.some(m => m.error), JSON.stringify(idle));
+    expect('error bubble says it went wrong, not "I\'ll analyze this"', idle.messages.some(m => m.error && /went wrong/.test(m.text)) && !idle.messages.some(m => /analyze this/.test(m.text || '')), JSON.stringify(idle.messages));
     const rt = await r.call('POST', { action: 'retry', chat });
     expect('retry posted', rt.status === 200);
     await until(r, chat, 'ready');
