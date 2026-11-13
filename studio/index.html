@@ -423,6 +423,8 @@
       acts.append(button('ghost mono', 'Drop', discard));
       previewLink();
       retryBtn();
+    } else if (data.status === 'limited') {
+      info = 'Weekly limit reached. Send it again once it frees up.';
     } else if (data.status === 'stuck' || (data.status === 'idle' && data.canRetry)) {
       info = data.status === 'stuck' ? 'No reply yet.' : 'That didn’t work.';
       retryBtn();

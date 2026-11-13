@@ -220,6 +220,21 @@ async function scenario(name, env, fn) {
     expect('13th new chat in an hour refused', over.status === 429 && over.body.error === 'slow-down', JSON.stringify(over));
   });
 
+  await scenario('weekly limit: the chat says so instead of hanging', {}, async r => {
+    const { body: { chat } } = await r.call('POST', { action: 'send', text: 'add a TBA date, over the limit' });
+    const limited = await until(r, chat, 'limited');
+    expect('limited, with the reason as a reply', limited.messages.some(m => m.from === 'bot' && /limit/.test(m.text)), JSON.stringify(limited.messages));
+    expect('no try again while limited', !limited.canRetry);
+    const pub = await r.call('POST', { action: 'publish', chat });
+    expect('nothing to put live', pub.status === 409, JSON.stringify(pub.body));
+
+    const b = (await r.call('POST', { action: 'send', text: 'add a TBA date Jan 9 in LA' })).body.chat;
+    await until(r, b, 'ready');
+    await r.call('POST', { action: 'send', chat: b, text: 'also the subtitle, over the limit' });
+    const still = await until(r, b, 'ready');
+    expect('a limited follow-up keeps the change ready to go live', still.messages.some(m => m.from === 'bot' && /limit/.test(m.text)), JSON.stringify(still.messages.slice(-2)));
+  });
+
   await scenario('checkup flags a passcode that is too short', { STUDIO_PASSCODE_TINY: 'short' }, async r => {
     const { body } = await r.call('GET', { health: 1 });
     const pc = body.checks.find(c => c.name === 'Passcodes');

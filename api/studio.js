@@ -41,6 +41,7 @@ const MARK = '<!-- studio -->';        // sent from the chat
 const NOTE = '<!-- studio-note -->';   // a status line in the chat, never a request
 const UNDONE = '<!-- undone -->';
 const REDO = '<!-- redo -->';
+const LIMIT = '<!-- limit -->';        // the bot's weekly limit was reached (site-edits.yml)
 const AUTOFIX = /<!-- autofix:([0-9A-Za-z-]{3,64}) -->/;
 const UPLOADS = 'studio-uploads';      // images sent in the chat; never deployed
 const BOT = 'claude[bot]';
@@ -212,6 +213,10 @@ function toMessage(c) {
   const isBot = c.user && c.user.type === 'Bot';
   const base = { id: c.id, at: c.created_at };
 
+  // The weekly limit answers in the bot's place.
+  if (body.includes(NOTE) && body.includes(LIMIT) && login === ACTIONS_BOT) {
+    return { ...base, from: 'bot', limit: true, text: stripComments(body) };
+  }
   if (body.includes(NOTE) && (!isBot || login === ACTIONS_BOT)) {
     return { ...base, from: 'note', text: stripComments(body), undone: body.includes(UNDONE) };
   }
@@ -324,6 +329,8 @@ async function readChat(chat, { openPR = false, autofix = false } = {}) {
         status = 'failed';
       }
     }
+  } else if (lastReply && lastReply.limit) {
+    status = 'limited';
   } else {
     status = 'idle';
   }

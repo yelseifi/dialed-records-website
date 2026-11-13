@@ -8,6 +8,7 @@
 //   "breaks"    → makes a change that fails the site check (until autofixed)
 //   "silent"    → never answers (and the message is backdated so it's stuck)
 //   "tools"     → the change also edits tools/check-site.js (needs review)
+//   "over the limit" → the weekly limit answers instead of the bot
 //   anything else → makes a change that passes
 // CLASH=behind   → first merge 405s; update-branch fixes it
 // CLASH=conflict → merge 405s and update-branch reports a conflict (redo)
@@ -44,6 +45,7 @@ const log = [];
 const user = { login: 'yelseifi', type: 'User' };
 const bot = { login: 'claude[bot]', type: 'Bot' };
 const vercel = { login: 'vercel[bot]', type: 'Bot' };
+const actionsBot = { login: 'github-actions[bot]', type: 'Bot' };
 
 const issueView = n => (issues[n].pull_request ? { ...issues[n], pull_request: { url: 'x' } } : issues[n]);
 const respond = (status, data) => new Response(data === undefined ? null : JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
@@ -75,6 +77,11 @@ async function simulateBot(target, text, title) {
     return;
   }
   botRuns.unshift({ display_title: title, status: 'completed', conclusion: 'success', created_at: now() });
+  if (/over the limit/i.test(text)) {
+    await wait(1);
+    addComment(target, actionsBot, "That's this week's limit for site changes (20 in 7 days), to keep Claude free for other work. The next one frees up Sat, Nov 14, 12:41 PM. Youssef can raise the limit.\n\n<!-- studio-note --><!-- limit -->");
+    return;
+  }
   const isPR = !!issues[target].pull_request;
   await wait(2);
   const c = addComment(target, bot, `Claude Code is working… <img src="x" />\n\nI'll analyze this and get back to you.\n\n[View job run](https://github.com/x/actions/runs/1)`);

@@ -22,7 +22,11 @@ on:
     types: [created]
 
 jobs:
-  claude:
+  # The weekly limit, so the bot can't eat into the Claude plan's limits:
+  # at most BOT_WEEKLY_RUNS runs in any 7 days (default 20). Over it, Claude
+  # doesn't start at all, and the chat says when the next one frees up. To
+  # change it: repo Settings → Secrets and variables → Actions → Variables.
+  gate:
     # Public repo: only people added to it can start a run, and never bots
     # (Claude's own replies and Vercel's comments would otherwise loop).
     # The action checks write access again itself. Studio notes ("Undone.")
@@ -32,6 +36,30 @@ jobs:
         github.event.comment.author_association || github.event.issue.author_association) &&
       (github.event.comment.user.type || github.event.issue.user.type) != 'Bot' &&
       !contains(github.event.comment.body, '<!-- studio-note -->')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    outputs:
+      ok: ${{ steps.limit.outputs.ok }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github
+          persist-credentials: false
+      - name: Weekly limit
+        id: limit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIMIT: ${{ vars.BOT_WEEKLY_RUNS || '20' }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: node .github/bot-limit.js
+
+  claude:
+    needs: gate
+    if: needs.gate.outputs.ok == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
@@ -85,8 +113,11 @@ jobs:
             Photos arrive as raw.githubusercontent.com links on the studio-uploads branch. Download them with curl and look at them. They're references, like a flyer or a cover: only turn one into a site asset when CLAUDE.md says to, and never commit the original.
           # Sonnet: good enough for site edits, and it leaves the Claude plan's
           # limits for other work. Each run's usage is logged in the next step.
+          # --max-turns stops a run that goes in circles; a big release takes
+          # about 40.
           claude_args: |
             --model claude-sonnet-5-5
+            --max-turns 60
             --allowedTools "Bash(curl:*),Bash(python3:*),Bash(node --check:*),Bash(node tools/check-site.js:*),WebFetch,WebSearch"
 
       # What the run used, to keep an eye on the Claude plan's limits. Shows on
