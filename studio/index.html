@@ -441,6 +441,7 @@
       info = 'Weekly limit reached. Send it again once it frees up.';
     } else if (data.status === 'stuck' || (data.status === 'idle' && data.canRetry)) {
       info = data.status === 'stuck' ? 'No reply yet.' : 'That didn’t work.';
+      acts.append(button('ghost mono', 'Drop', discard));
       retryBtn();
     } else if (data.status === 'live') {
       info = 'Live on the site. Can take a minute to show up.';
