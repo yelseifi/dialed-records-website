@@ -61,6 +61,7 @@ jobs:
       # Pinned: the studio reads this action's comments, so its format must
       # not change under us. Upgrade on purpose, and test the studio after.
       - uses: anthropics/claude-code-action@4a0465fcf999da98c6ba185172bf18ddf1a85003 # v1.0.275
+        id: claude
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # track_progress + prompt = respond to every message (no trigger
@@ -82,5 +83,19 @@ jobs:
             If the message is a question or just a comment, answer it and change nothing.
             Most messages come from the Dialed Studio chat on the website (dialed-records.com/studio), where the person only sees your final reply, as a chat bubble. So never mention GitHub, issues, branches, pull requests or commits. When you've made a change, end with: "Check the preview, then tap Put it live."
             Photos arrive as raw.githubusercontent.com links on the studio-uploads branch. Download them with curl and look at them. They're references, like a flyer or a cover: only turn one into a site asset when CLAUDE.md says to, and never commit the original.
+          # Sonnet: good enough for site edits, and it leaves the Claude plan's
+          # limits for other work. Each run's usage is logged in the next step.
           claude_args: |
+            --model claude-sonnet-5-5
             --allowedTools "Bash(curl:*),Bash(python3:*),Bash(node --check:*),Bash(node tools/check-site.js:*),WebFetch,WebSearch"
+
+      # What the run used, to keep an eye on the Claude plan's limits. Shows on
+      # the run's page in the Actions tab. Only the totals: the execution file
+      # holds the whole conversation and this repo is public, so it's never
+      # uploaded.
+      - name: Usage
+        if: always() && steps.claude.outputs.execution_file != ''
+        continue-on-error: true
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: node .github/bot-usage.js "$EXECUTION_FILE"
