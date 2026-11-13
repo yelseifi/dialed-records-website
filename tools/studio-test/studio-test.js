@@ -92,7 +92,8 @@ async function scenario(name, env, fn) {
       last = (await r.call('GET', { chat })).body;
       saw.add(last.status);
       if (last.status === 'ready' && saw.has('waiting') && last.preview.url && last.messages.some(m => /Fixed it/.test(m.text || ''))) break;
-      if (last.status === 'checking') {
+      // Once is enough: trying again can land just as the fixed check passes.
+      if (last.status === 'checking' && !saw.has('publish-while-checking:409')) {
         const early = await r.call('POST', { action: 'publish', chat });
         saw.add(`publish-while-checking:${early.status}`);
       }
