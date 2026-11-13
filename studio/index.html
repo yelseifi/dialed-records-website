@@ -163,8 +163,9 @@
     del(k) { try { localStorage.removeItem(k); } catch (e) {} },
   };
 
-  let key = store.get('studioKey') || '';
-  let chat = null;      // the open chat's number; null = a new chat
+  let key = '';         // a typed passcode, for this visit; the server's cookie keeps it after
+  let signedIn = false;
+  let chat = null;     // the open chat's number; null = a new chat
   let state = null;     // the last loaded chat
   let shots = [];       // photos waiting to be sent, as base64 JPEG
   let timer = null;
@@ -177,7 +178,7 @@
     try {
       res = await fetch(url, {
         method,
-        headers: { 'x-studio-key': key, ...(method === 'POST' ? { 'content-type': 'application/json' } : {}) },
+        headers: { ...(key ? { 'x-studio-key': key } : {}), ...(method === 'POST' ? { 'content-type': 'application/json' } : {}) },
         body: method === 'POST' ? JSON.stringify(params) : undefined,
       });
     } catch (e) {
@@ -186,7 +187,7 @@
     if (res.status === 413) throw new Error('That was too big to send. Try fewer photos.');
     let data = {};
     try { data = await res.json(); } catch (e) {}
-    if (res.status === 401) { lock("That passcode isn't right."); throw new Error('locked'); }
+    if (res.status === 401) { lock(data.error === 'passcode' ? "That passcode isn't right." : ''); throw new Error('locked'); }
     if (!res.ok) throw Object.assign(new Error(data.message || 'Something went wrong. Try again.'), { code: data.error });
     return data;
   }
@@ -194,31 +195,43 @@
   /* ─── Passcode ─── */
   function lock(note) {
     key = '';
+    signedIn = false;
     store.del('studioKey');
     stopPolling();
     ['top', 'list', 'thread', 'bar', 'composer'].forEach(id => { $(id).hidden = true; });
     $('gate').hidden = false;
+    $('gateForm').hidden = false;
     $('gateNote').textContent = note || '';
     $('gateNote').classList.toggle('bad', !!note);
     $('key').value = '';
     $('key').focus();
   }
 
-  $('gateForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    key = $('key').value.trim();
+  // With no passcode, this asks whether this phone is already signed in.
+  async function signIn(passcode) {
+    key = passcode;
     $('gateNote').classList.remove('bad');
-    $('gateNote').textContent = 'Checking…';
+    $('gateNote').textContent = passcode ? 'Checking…' : '';
     try {
       const { chats } = await api('GET');
-      store.set('studioKey', key);
+      signedIn = true;
+      store.del('studioKey'); // from before the cookie
       $('gate').hidden = true;
       $('top').hidden = false;
       const open = chats.find(c => c.open);
       open ? openChat(open.id) : newChat();
     } catch (err) {
-      if (err.message !== 'locked') { $('gateNote').classList.add('bad'); $('gateNote').textContent = err.message; }
+      if (err.message !== 'locked') {
+        $('gateForm').hidden = false;
+        $('gateNote').classList.add('bad');
+        $('gateNote').textContent = err.message;
+      }
     }
+  }
+
+  $('gateForm').addEventListener('submit', e => {
+    e.preventDefault();
+    signIn($('key').value.trim());
   });
 
   /* ─── Views ─── */
@@ -619,16 +632,24 @@
   function schedule(ms) { stopPolling(); timer = setTimeout(() => { if (!document.hidden) refresh(false); }, ms); }
   function stopPolling() { clearTimeout(timer); timer = null; }
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && chat !== null && key && $('list').hidden) refresh(false);
+    if (!document.hidden && chat !== null && signedIn && $('list').hidden) refresh(false);
   });
 
   /* ─── Start ─── */
-  if (key) {
-    $('key').value = key;
-    $('gateForm').requestSubmit();
-  } else {
-    $('key').focus();
+  // A sign-in link, /studio#k=<passcode>, signs a phone in with one tap. The
+  // passcode comes straight off the address so it isn't left on screen.
+  function fromLink() {
+    const link = new URLSearchParams(location.hash.slice(1)).get('k');
+    if (link !== null) history.replaceState(null, '', location.pathname + location.search);
+    return (link || '').trim();
   }
+  // The link opened while the studio is already showing in this tab.
+  addEventListener('hashchange', () => {
+    const link = fromLink();
+    if (link && !signedIn) signIn(link);
+  });
+  $('gateForm').hidden = true; // until we know this phone needs it
+  signIn(fromLink() || (store.get('studioKey') || '').trim());
 })();
 </script>
 </body>

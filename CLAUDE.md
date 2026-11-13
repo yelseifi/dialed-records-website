@@ -102,6 +102,7 @@ What goes live from the studio:
 - Only `index.html`, `main.js`, `style.css` and photos in `images/` can go live from the chat.
 - A change that touches anything else waits for Youssef to merge it on GitHub.
 - Each person's name goes on what they send, put live or undo, both in the issue and in the commit.
+- Each phone signs in once and stays signed in: the passcode is kept in a locked-down cookie, renewed on every visit. To sign someone in with one tap, send them `dialed-records.com/studio#k=<their passcode>`.
 
 `.github/workflows/site-check.yml` runs the site check:
 - On every pull request. "Put it live" waits for it, and a failure is sent back to the bot to fix.

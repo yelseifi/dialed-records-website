@@ -650,10 +650,30 @@ function people() {
   return list;
 }
 
+/* After the first sign-in the passcode is kept in a cookie, so each phone
+   asks once. HttpOnly: the page's scripts can't read it. SameSite=Strict:
+   other sites can't send it. Path: only this API gets it. It's renewed on
+   every visit, so it only runs out after 400 days (the most browsers allow)
+   without opening the studio. A typed passcode (the header) wins. */
+const COOKIE = 'studio';
+const KEEP_SECONDS = 400 * 24 * 3600;
+
+function passcodeFrom(req) {
+  if (req.headers['x-studio-key']) return String(req.headers['x-studio-key']);
+  const m = String(req.headers.cookie || '').match(/(?:^|;\s*)studio=([^;]*)/);
+  if (!m) return '';
+  try { return decodeURIComponent(m[1]); } catch (e) { return ''; }
+}
+
+function remember(res, code) {
+  const value = code ? `${encodeURIComponent(code)}; Max-Age=${KEEP_SECONDS}` : '; Max-Age=0';
+  res.setHeader('set-cookie', `${COOKIE}=${value}; Path=/api/studio; HttpOnly; Secure; SameSite=Strict`);
+}
+
 /* Who this passcode belongs to, or null. Compares against every passcode in
    constant time. */
-function whoIs(req) {
-  const got = crypto.createHash('sha256').update(String(req.headers['x-studio-key'] || '')).digest();
+function whoIs(code) {
+  const got = crypto.createHash('sha256').update(code).digest();
   let match = null;
   for (const person of people()) {
     const want = crypto.createHash('sha256').update(person.code).digest();
@@ -676,11 +696,15 @@ module.exports = async function handler(req, res) {
   if (!process.env.STUDIO_GITHUB_TOKEN || !people().length) {
     return res.status(503).json({ error: 'setup', message: "The studio isn't switched on yet. Tell Youssef: set STUDIO_GITHUB_TOKEN and a passcode (STUDIO_PASSCODE_<NAME>) in Vercel." });
   }
-  const person = whoIs(req);
+  const code = passcodeFrom(req);
+  const person = code ? whoIs(code) : null;
   if (!person) {
+    if (!code) return res.status(401).json({ error: 'signin', message: 'Enter the passcode.' });
     await new Promise(r => setTimeout(r, 1000)); // slows down guessing
+    remember(res, null); // a passcode that's been removed stops working on every phone
     return res.status(401).json({ error: 'passcode', message: "That passcode isn't right." });
   }
+  remember(res, person.code);
   try {
     if (req.method === 'GET') {
       if (req.query.health) return res.status(200).json(await health());

@@ -22,7 +22,7 @@ function rig(env = {}) {
   };
   const debug = async () => (await fetch(`${base}/__log`)).json();
   const mergeOnGitHub = n => fetch(`${base}/__merge?n=${n}`);
-  return { ready, call, debug, mergeOnGitHub, stop: () => child.kill() };
+  return { ready, base, call, debug, mergeOnGitHub, stop: () => child.kill() };
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -212,6 +212,26 @@ async function scenario(name, env, fn) {
     const shared = (await r.call('POST', { action: 'send', text: 'add a TBA date Feb 6 in LA', who: 'Mallory' })).body.chat;
     const s = (await r.call('GET', { chat: shared })).body;
     expect('shared passcode: no name, and a name in the request is ignored', !s.messages[0].by, JSON.stringify(s.messages[0]));
+  });
+
+  await scenario('a phone stays signed in', {}, async r => {
+    const get = async headers => {
+      const t = Date.now();
+      const res = await fetch(`${r.base}/api/studio`, { headers });
+      return { status: res.status, body: await res.json(), cookie: res.headers.get('set-cookie') || '', ms: Date.now() - t };
+    };
+    const first = await get({ 'x-studio-key': KEY });
+    const kept = first.cookie.match(/^studio=([^;]+)/);
+    expect('signing in sets a cookie', first.status === 200 && !!kept, first.cookie);
+    expect('the cookie is locked down and lasts', ['HttpOnly', 'Secure', 'SameSite=Strict', 'Path=/api/studio', `Max-Age=${400 * 86400}`].every(f => first.cookie.includes(f)), first.cookie);
+    const back = await get({ cookie: `other=1; studio=${kept && kept[1]}` });
+    expect('the cookie alone gets back in, and is renewed', back.status === 200 && Array.isArray(back.body.chats) && /^studio=[^;]+; Max-Age=/.test(back.cookie), `${back.status} ${back.cookie}`);
+    const none = await get({});
+    expect('no passcode: asks for it, quickly, no error', none.status === 401 && none.body.error === 'signin' && none.ms < 800, `${none.status} ${none.body.error} ${none.ms}ms`);
+    const stale = await get({ cookie: 'studio=removed-passcode-1' });
+    expect('a removed passcode is refused and the cookie cleared', stale.status === 401 && stale.body.error === 'passcode' && /^studio=; Max-Age=0/.test(stale.cookie), `${stale.status} ${stale.cookie}`);
+    const typed = await get({ 'x-studio-key': 'nope-nope-nope', cookie: `studio=${kept && kept[1]}` });
+    expect('a typed passcode wins over the cookie', typed.status === 401, String(typed.status));
   });
 
   await scenario('too many new chats in an hour', {}, async r => {
