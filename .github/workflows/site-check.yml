@@ -1,0 +1,128 @@
+# Site check: tools/check-site.js loads the site in headless Chrome and fails
+# on errors, missing files, bad data or sections that don't render.
+#
+#   - On every pull request: the studio won't let "Put it live" through until
+#     this passes, and asks the bot to fix the change if it fails.
+#   - On every push to main: if a change from the studio chat broke the site,
+#     and the site was fine before it, it's undone automatically and the chat
+#     is told why. Anything else that fails just fails, and GitHub emails.
+#   - Every morning, against the live site, to catch breakage that doesn't come
+#     from a commit (a CDN, an expired file). A failure emails the repo owner.
+
+name: Site check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 15 * * *' # 7am in LA
+  workflow_dispatch:
+
+concurrency:
+  group: site-check-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Runs whatever the change contains, so it only gets to read.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      code: ${{ steps.check.outputs.code }}
+      found: ${{ steps.check.outputs.found }}
+    env:
+      NODE_PATH: ${{ github.workspace }}/../check-deps/node_modules
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install the checker
+        run: npm install --prefix "$GITHUB_WORKSPACE/../check-deps" --no-save --no-package-lock --no-audit --no-fund puppeteer-core@25.15.0
+
+      - name: Check the site
+        id: check
+        shell: bash
+        env:
+          TARGET: ${{ github.event_name == 'schedule' && 'https://dialed-records.com' || '' }}
+        run: |
+          set +e
+          node tools/check-site.js $TARGET > "$RUNNER_TEMP/check.txt" 2>&1
+          code=$?
+          cat "$RUNNER_TEMP/check.txt"
+          cat "$RUNNER_TEMP/check.txt" >> "$GITHUB_STEP_SUMMARY"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          { echo 'found<<EOF'; grep '^  - ' "$RUNNER_TEMP/check.txt" | head -8; echo EOF; } >> "$GITHUB_OUTPUT"
+
+      - name: Fail if the site is broken
+        if: steps.check.outputs.code != '0'
+        run: exit 1
+
+  # Only for main, where the code is already trusted: undo a studio change
+  # that broke the site, if the site was fine before it.
+  undo:
+    needs: check
+    if: always() && github.event_name == 'push' && needs.check.outputs.code == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      issues: write
+    env:
+      NODE_PATH: ${{ github.workspace }}/../check-deps/node_modules
+    steps:
+      - name: Is it a studio change?
+        id: chat
+        shell: bash
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          chat=$(printf '%s\n' "$MESSAGE" | sed -n 's/^From the studio chat #\([0-9][0-9]*\)\.$/\1/p' | head -1)
+          echo "chat=$chat" >> "$GITHUB_OUTPUT"
+          [ -n "$chat" ] || echo "Not a studio change, so it's left for a person to fix."
+
+      - uses: actions/checkout@v6
+        if: steps.chat.outputs.chat != ''
+        with:
+          fetch-depth: 2
+
+      - name: Undo it if the site passed before it
+        if: steps.chat.outputs.chat != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHAT: ${{ steps.chat.outputs.chat }}
+          FOUND: ${{ needs.check.outputs.found }}
+        run: |
+          npm install --prefix "$GITHUB_WORKSPACE/../check-deps" --no-save --no-package-lock --no-audit --no-fund puppeteer-core@25.15.0
+          git worktree add -q "$RUNNER_TEMP/before" HEAD~1
+          mkdir -p "$RUNNER_TEMP/before/tools"
+          cp tools/check-site.js "$RUNNER_TEMP/before/tools/check-site.js"
+          if ! node "$RUNNER_TEMP/before/tools/check-site.js"; then
+            echo "The site was already failing before this change, so undoing it wouldn't help."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          subject=$(git log -1 --format=%s "$GITHUB_SHA")
+          git fetch -q origin main
+          git checkout -q -B undo origin/main
+          if ! git revert --no-edit --no-commit "$GITHUB_SHA"; then
+            echo "Couldn't undo it cleanly (main moved on). Leaving it for a person."
+            git revert --abort || true
+            exit 0
+          fi
+          git commit -q -m "Undo \"$subject\": it broke the site check" -m "Undone automatically for studio chat #$CHAT."
+          git push -q origin HEAD:main
+
+          printf '%s\n\n%s\n%s\n\n%s\n' \
+            "Something broke on the site after this went live, so I put it back the way it was. Nothing from this chat is on the site now." \
+            "What the check found:" "$FOUND" \
+            "<!-- studio-note --><!-- undone -->" > "$RUNNER_TEMP/note.md"
+          gh api "repos/$GITHUB_REPOSITORY/issues/$CHAT/labels" -f 'labels[]=undone' > /dev/null || true
+          gh issue comment "$CHAT" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/note.md" || true
