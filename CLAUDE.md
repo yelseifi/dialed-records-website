@@ -16,7 +16,7 @@ All content lives in the data section at the top of `main.js`. Edit the data. Do
 | `MERCH` | Links to dialedrecords.bandcamp.com product pages |
 | `GALLERY` | Instagram tiles; images go in `images/gallery/` |
 
-After any edit, run `node --check main.js`.
+After any edit, run `node --check main.js`, then `node tools/check-site.js`. It loads the site in headless Chrome and checks the data and that every section renders. It needs Chrome and puppeteer-core: `npm install --prefix ../check-deps --no-save puppeteer-core@25.15.0`.
 
 ## Events
 
@@ -90,3 +90,37 @@ These come from Youssef and are firm:
 ## Commits
 
 One change per commit. The message reads like a changelog line, for example `DRX029: Sublee - Groove Control takes the spotlight` or `Dec 3: Alci · Anthea · Priku at Sable for Art Basel`. `tools/` and this file are for whoever maintains the site. The site doesn't load them.
+
+## The studio
+
+dialed-records.com/studio is a chat page for site changes, so Josh and Youssef never have to open GitHub.
+- Each chat is a GitHub issue.
+- The bot in `.github/workflows/site-edits.yml` answers the issue and makes the change on a branch.
+- `api/studio.js` opens a pull request, shows Vercel's preview, and merges it on "Put it live".
+
+What goes live from the studio:
+- Only `index.html`, `main.js`, `style.css` and photos in `images/` can go live from the chat.
+- A change that touches anything else waits for Youssef to merge it on GitHub.
+- Each person's name goes on what they send, put live or undo, both in the issue and in the commit.
+
+`.github/workflows/site-check.yml` runs the site check:
+- On every pull request. "Put it live" waits for it, and a failure is sent back to the bot to fix.
+- On every push to main. A studio change that breaks the check is undone automatically.
+- Every morning, against the live site.
+
+To test the studio after changing `api/studio.js` or upgrading the pinned bot action, run `node tools/studio-test/studio-test.js .` (about 4 minutes). It uses a fake GitHub.
+
+### First aid
+
+| What's wrong | What to do |
+|---|---|
+| Not sure | Go to /studio, tap Chats, then Checkup. It tests the keys, the bot and the site check, and says what to fix. |
+| A change went live and shouldn't have | Tap Undo in its chat. If that refuses, or the change didn't come from the studio, go to Vercel → Deployments and use Instant Rollback to the last good deployment. Then fix `main`. |
+| The bot never answers, or every run fails | The Claude login has expired (it lasts about a year). Run `claude setup-token`, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo yelseifi/dialed-records-website`. Also check that the Claude GitHub app is still installed on the repo. |
+| "The studio's GitHub key stopped working" | `STUDIO_GITHUB_TOKEN` has expired. Make a new fine-grained token for this repo only, with read and write on Contents, Issues and Pull requests, and read on Actions and Deployments. Put it in Vercel and redeploy. |
+| No preview shows up | Vercel's preview protection must be off, and the token needs read access to Deployments. |
+| Stop everything now | GitHub → Actions → Site edits → Disable workflow stops the bot. Deleting the `STUDIO_PASSCODE*` variables in Vercel and redeploying locks the page. |
+| Someone shouldn't have access any more | Delete their `STUDIO_PASSCODE_<NAME>` in Vercel and redeploy. |
+| The studio itself is down | Open an issue on the repo and write the request there. The bot answers it the same way. |
+
+Vercel only picks up a change to an environment variable on the next deploy.

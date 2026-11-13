@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+  <title>Dialed Studio</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000;
+      --white: #fff;
+      --text: rgba(255,255,255,0.92);
+      --dim: rgba(255,255,255,0.45);
+      --dimmer: rgba(255,255,255,0.15);
+      --border: rgba(255,255,255,0.09);
+      --bubble: rgba(255,255,255,0.06);
+      --error: #ff6b5b;
+      --font: 'Space Grotesk', sans-serif;
+      --mono: 'Space Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--black); color: var(--text); }
+    body { font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    button:disabled { cursor: default; opacity: 0.35; }
+    a { color: var(--white); }
+    .mono { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+    [hidden] { display: none !important; }
+
+    .app { height: 100dvh; display: flex; flex-direction: column; max-width: 720px; margin: 0 auto; }
+
+    /* Passcode */
+    .gate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px 16px; }
+    .gate h1 { font: 600 15px var(--mono); letter-spacing: 0.32em; text-transform: uppercase; }
+    .gate form { display: flex; width: min(340px, 100%); border: 1px solid var(--dimmer); border-radius: 999px; overflow: hidden; }
+    .gate input { flex: 1; min-width: 0; background: none; border: 0; color: var(--white); font: 16px var(--font); padding: 12px 18px; outline: none; }
+    .gate form button { padding: 0 18px; border-left: 1px solid var(--dimmer); }
+    .gate .note { min-height: 18px; color: var(--dim); }
+    .gate .note.bad { color: var(--error); }
+
+    /* Header */
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); border-bottom: 1px solid var(--border); }
+    header .brand { font: 600 12px var(--mono); letter-spacing: 0.28em; text-transform: uppercase; }
+    header nav { display: flex; gap: 6px; }
+    .pill { padding: 7px 13px; border: 1px solid var(--dimmer); border-radius: 999px; }
+    .pill:hover:not(:disabled) { border-color: var(--dim); }
+
+    /* Chat list */
+    .list { flex: 1; overflow-y: auto; padding: 8px 16px 24px; }
+    .list button { display: flex; width: 100%; justify-content: space-between; align-items: baseline; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); text-align: left; }
+    .list .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list .s { flex-shrink: 0; color: var(--dim); }
+    .list .empty { padding: 32px 0; color: var(--dim); }
+    .list .checkup-btn { display: block; width: auto; margin: 24px auto 0; padding: 7px 13px; border: 1px solid var(--dimmer); border-radius: 999px; color: var(--dim); }
+    .checks { padding: 8px 0 24px; }
+    .checks h2 { font: 600 11px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); padding: 16px 0 8px; }
+    .check { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .check b { flex-shrink: 0; width: 18px; font-weight: 600; }
+    .check.ok b { color: var(--dim); }
+    .check.bad b { color: var(--error); }
+    .check small { display: block; color: var(--dim); font-size: 14px; margin-top: 2px; }
+
+    /* Thread */
+    .thread { flex: 1; overflow-y: auto; padding: 20px 16px 12px; display: flex; flex-direction: column; gap: 10px; }
+    .hello { margin: auto 0; padding: 24px 4px; color: var(--dim); }
+    .hello p + p { margin-top: 10px; }
+    .hello .mono { color: var(--dimmer); display: block; margin-bottom: 14px; }
+    .msg { max-width: 86%; padding: 10px 14px; border-radius: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .msg.you { align-self: flex-end; background: var(--white); color: var(--black); border-bottom-right-radius: 6px; }
+    .msg.you a { color: var(--black); }
+    .who { align-self: flex-end; margin: 4px 6px -6px; font-size: 11px; color: var(--dim); }
+    .msg.bot { align-self: flex-start; background: var(--bubble); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+    .msg.bot.error { border-color: rgba(255,107,91,0.4); }
+    .msg img { display: block; max-width: 100%; max-height: 260px; border-radius: 10px; margin: 6px 0; }
+    .msg.working { display: flex; align-items: center; gap: 10px; color: var(--dim); }
+    .msg.note { align-self: center; max-width: 92%; padding: 2px 8px; color: var(--dim); font-size: 14px; text-align: center; }
+    .dots { display: inline-flex; gap: 4px; }
+    .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); animation: blink 1.4s infinite both; }
+    .dots i:nth-child(2) { animation-delay: 0.2s; }
+    .dots i:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .dots i { animation: none; opacity: 0.6; } }
+
+    /* Ready / live bar */
+    .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 0 16px 10px; padding: 12px 14px; border: 1px solid var(--dimmer); border-radius: 14px; }
+    .bar .info { color: var(--dim); font-size: 14px; }
+    .bar .acts { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+    .go { padding: 9px 16px; background: var(--white); color: var(--black); border-radius: 999px; font-weight: 600; }
+    .ghost { padding: 9px 4px; color: var(--dim); }
+    .bar a.pill { text-decoration: none; }
+
+    /* Composer */
+    .composer { padding: 10px 16px; padding-bottom: max(14px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); }
+    .shots { display: flex; gap: 8px; margin-bottom: 8px; }
+    .shots div { position: relative; }
+    .shots img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; display: block; }
+    .shots button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--white); color: var(--black); font-size: 13px; line-height: 20px; }
+    .row { display: flex; align-items: flex-end; gap: 8px; }
+    .row textarea { flex: 1; min-width: 0; resize: none; max-height: 160px; padding: 10px 16px; border: 1px solid var(--dimmer); border-radius: 22px; background: none; color: var(--white); font: 16px/1.4 var(--font); outline: none; }
+    .row textarea:focus { border-color: var(--dim); }
+    .round { width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--dimmer); display: grid; place-items: center; }
+    .round.send { background: var(--white); color: var(--black); border-color: var(--white); }
+    .round svg { width: 18px; height: 18px; }
+    .hint { min-height: 18px; margin-top: 6px; color: var(--dim); font-size: 13px; }
+    .hint.bad { color: var(--error); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <section class="gate" id="gate">
+    <h1>Dialed Studio</h1>
+    <form id="gateForm">
+      <input id="key" type="password" autocomplete="current-password" placeholder="Passcode" aria-label="Passcode" required>
+      <button class="mono" type="submit">Enter</button>
+    </form>
+    <p class="note mono" id="gateNote"></p>
+  </section>
+
+  <header id="top" hidden>
+    <span class="brand">Dialed Studio</span>
+    <nav>
+      <button class="pill mono" id="chatsBtn" type="button">Chats</button>
+      <button class="pill mono" id="newBtn" type="button">New</button>
+    </nav>
+  </header>
+
+  <section class="list" id="list" hidden></section>
+
+  <section class="thread" id="thread" hidden aria-live="polite"></section>
+
+  <div class="bar" id="bar" hidden></div>
+
+  <form class="composer" id="composer" hidden>
+    <div class="shots" id="shots" hidden></div>
+    <div class="row">
+      <button class="round" id="attach" type="button" aria-label="Add a photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+      </button>
+      <input id="file" type="file" accept="image/*" multiple hidden>
+      <textarea id="text" rows="1" placeholder="Message" aria-label="Message"></textarea>
+      <button class="round send" id="send" type="submit" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+    <p class="hint" id="hint"></p>
+  </form>
+
+</div>
+<script>
+(() => {
+  const API = '/api/studio';
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+
+  let key = store.get('studioKey') || '';
+  let chat = null;      // the open chat's number; null = a new chat
+  let state = null;     // the last loaded chat
+  let shots = [];       // photos waiting to be sent, as base64 JPEG
+  let timer = null;
+  let sending = false;
+
+  /* ─── API ─── */
+  async function api(method, params) {
+    const url = method === 'GET' && params ? `${API}?${new URLSearchParams(params)}` : API;
+    let res;
+    try {
+      res = await fetch(url, {
+        method,
+        headers: { 'x-studio-key': key, ...(method === 'POST' ? { 'content-type': 'application/json' } : {}) },
+        body: method === 'POST' ? JSON.stringify(params) : undefined,
+      });
+    } catch (e) {
+      throw new Error('No connection. Check your signal and try again.');
+    }
+    if (res.status === 413) throw new Error('That was too big to send. Try fewer photos.');
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (res.status === 401) { lock("That passcode isn't right."); throw new Error('locked'); }
+    if (!res.ok) throw Object.assign(new Error(data.message || 'Something went wrong. Try again.'), { code: data.error });
+    return data;
+  }
+
+  /* ─── Passcode ─── */
+  function lock(note) {
+    key = '';
+    store.del('studioKey');
+    stopPolling();
+    ['top', 'list', 'thread', 'bar', 'composer'].forEach(id => { $(id).hidden = true; });
+    $('gate').hidden = false;
+    $('gateNote').textContent = note || '';
+    $('gateNote').classList.toggle('bad', !!note);
+    $('key').value = '';
+    $('key').focus();
+  }
+
+  $('gateForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    key = $('key').value.trim();
+    $('gateNote').classList.remove('bad');
+    $('gateNote').textContent = 'Checking…';
+    try {
+      const { chats } = await api('GET');
+      store.set('studioKey', key);
+      $('gate').hidden = true;
+      $('top').hidden = false;
+      const open = chats.find(c => c.open);
+      open ? openChat(open.id) : newChat();
+    } catch (err) {
+      if (err.message !== 'locked') { $('gateNote').classList.add('bad'); $('gateNote').textContent = err.message; }
+    }
+  });
+
+  /* ─── Views ─── */
+  function show(view) {
+    $('list').hidden = view !== 'list';
+    $('thread').hidden = view !== 'chat';
+    $('composer').hidden = view !== 'chat';
+    if (view !== 'chat') $('bar').hidden = true;
+    $('chatsBtn').textContent = view === 'list' ? 'Back' : 'Chats';
+  }
+
+  $('chatsBtn').addEventListener('click', () => {
+    if (!$('list').hidden) return chat ? openChat(chat) : newChat();
+    showList();
+  });
+  $('newBtn').addEventListener('click', newChat);
+
+  async function showList() {
+    stopPolling();
+    show('list');
+    const list = $('list');
+    list.textContent = '';
+    try {
+      const { chats } = await api('GET');
+      if (!chats.length) list.append(el('p', 'empty', 'No chats yet.'));
+      for (const c of chats) {
+        const b = el('button');
+        b.type = 'button';
+        b.append(el('span', 't', c.title), el('span', 's mono', c.open ? 'Open' : c.live ? 'Live' : c.undone ? 'Undone' : 'Dropped'));
+        b.addEventListener('click', () => openChat(c.id));
+        list.append(b);
+      }
+    } catch (err) {
+      if (err.message !== 'locked') list.append(el('p', 'empty', err.message));
+    }
+    const checkup = el('button', 'checkup-btn mono', 'Checkup');
+    checkup.type = 'button';
+    checkup.addEventListener('click', showCheckup);
+    list.append(checkup);
+  }
+
+  /* Checkup: is everything the studio needs set up and working? */
+  async function showCheckup() {
+    stopPolling();
+    show('list');
+    const list = $('list');
+    list.textContent = '';
+    const box = el('div', 'checks');
+    box.append(el('h2', '', 'Checkup'), el('p', 'empty', 'Checking…'));
+    list.append(box);
+    try {
+      const { checks } = await api('GET', { health: 1 });
+      box.lastChild.remove();
+      for (const c of checks) {
+        const row = el('div', `check ${c.ok ? 'ok' : 'bad'}`);
+        const text = el('div', '', c.name);
+        if (c.fix) text.append(el('small', '', c.fix));
+        row.append(el('b', '', c.ok ? '✓' : '✕'), text);
+        box.append(row);
+      }
+      if (checks.every(c => c.ok)) box.append(el('p', 'empty', 'All good.'));
+    } catch (err) {
+      if (err.message !== 'locked') box.lastChild.textContent = err.message;
+    }
+  }
+
+  function newChat() {
+    stopPolling();
+    chat = null;
+    state = null;
+    show('chat');
+    const t = $('thread');
+    t.textContent = '';
+    const hello = el('div', 'hello');
+    hello.append(
+      el('span', 'mono', 'New chat'),
+      el('p', '', 'Tell me what to change on the site, like you’d text it.'),
+      el('p', '', '“New event Dec 3 at Sable, here’s the ticket link…”  “DRX030 is out, here’s the link.”  “Add the recap post for Oct 31.”'),
+      el('p', '', 'I’ll make the change and send you a preview. Nothing goes live until you say so.'),
+    );
+    t.append(hello);
+    $('bar').hidden = true;
+    setComposer(true, '');
+    $('text').focus();
+  }
+
+  async function openChat(id) {
+    stopPolling();
+    chat = id;
+    state = null;
+    show('chat');
+    $('thread').textContent = '';
+    $('bar').hidden = true;
+    setComposer(false, 'Loading…');
+    await refresh(true);
+  }
+
+  /* ─── Thread ─── */
+  async function refresh(scroll) {
+    if (chat === null) return;
+    const id = chat;
+    let data;
+    try { data = await api('GET', { chat: id }); }
+    catch (err) {
+      if (err.message !== 'locked') { setComposer(true, err.message, true); schedule(20000); }
+      return;
+    }
+    if (chat !== id) return; // switched chats meanwhile
+    const t = $('thread');
+    const nearBottom = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
+    const changed = !state || JSON.stringify(state.messages) !== JSON.stringify(data.messages);
+    state = data;
+    if (changed) renderThread(data);
+    renderBar(data);
+    if (changed && (scroll || nearBottom)) t.scrollTop = t.scrollHeight;
+
+    const busy = data.status === 'working' || data.status === 'waiting';
+    const finished = ['live', 'closed', 'undone'].includes(data.status);
+    if (finished) setComposer(false, '');
+    else if (busy) setComposer(false, data.status === 'waiting' ? 'Sent. I’m on it — this takes a minute or two.' : '');
+    else setComposer(true, '');
+
+    // Keep watching while something is still happening on the other end.
+    if (busy) schedule(5000);
+    else if (data.status === 'checking' || (data.status === 'ready' && !(data.preview && data.preview.url))) schedule(8000);
+    else if (data.status === 'stuck') schedule(30000);
+    else if (data.status === 'live') schedule(60000); // in case the site check undoes it
+    else if (data.status === 'review') schedule(60000); // in case Youssef puts it live
+  }
+
+  function renderThread(data) {
+    const t = $('thread');
+    t.textContent = '';
+    // Several people in one chat: name each message.
+    const names = new Set(data.messages.filter(m => m.from === 'you' && m.by).map(m => m.by));
+    for (const m of data.messages) {
+      if (names.size > 1 && m.from === 'you' && m.by) t.append(el('div', 'who', m.by));
+      if (m.working) {
+        const w = el('div', 'msg bot working');
+        const dots = el('span', 'dots');
+        dots.append(el('i'), el('i'), el('i'));
+        w.append(dots, el('span', '', m.step || 'Working on it'));
+        t.append(w);
+        continue;
+      }
+      const b = el('div', `msg ${m.from}${m.error ? ' error' : ''}`);
+      renderText(b, m.text);
+      t.append(b);
+    }
+    if (data.status === 'stuck') {
+      const b = el('div', 'msg note', data.hint || 'Nothing back yet. Try again, and if that doesn’t work, run the Checkup from Chats.');
+      t.append(b);
+    }
+    if (data.status === 'waiting') {
+      const w = el('div', 'msg bot working');
+      const dots = el('span', 'dots');
+      dots.append(el('i'), el('i'), el('i'));
+      w.append(dots);
+      t.append(w);
+    }
+  }
+
+  function button(cls, label, onClick) {
+    const b = el('button', cls, label);
+    b.type = 'button';
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function renderBar(data) {
+    const bar = $('bar');
+    bar.textContent = '';
+    const acts = el('div', 'acts');
+    const p = data.preview || {};
+    const previewLink = () => {
+      if (!p.url) return;
+      const a = el('a', 'pill mono', 'Preview ↗');
+      a.href = p.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      acts.append(a);
+    };
+    const retryBtn = () => acts.append(button('pill mono', 'Try again', retry));
+    let info = '';
+
+    if (data.status === 'ready' || data.status === 'checking') {
+      const checking = data.status === 'checking';
+      info = checking ? 'Checking the change…' : p.url ? 'Ready. Check the preview.' : p.building ? 'Building a preview…' : 'Ready to go live.';
+      acts.append(button('ghost mono', 'Drop', discard));
+      if (data.canRetry) retryBtn();
+      previewLink();
+      const go = button('go', 'Put it live', publish);
+      go.disabled = checking;
+      acts.append(go);
+    } else if (data.status === 'review') {
+      info = 'This touches more than the site’s content, so Youssef needs to look at it before it goes live.';
+      acts.append(button('ghost mono', 'Drop', discard));
+      previewLink();
+      retryBtn();
+    } else if (data.status === 'failed') {
+      info = 'This change didn’t pass the site check.';
+      acts.append(button('ghost mono', 'Drop', discard));
+      previewLink();
+      retryBtn();
+    } else if (data.status === 'stuck' || (data.status === 'idle' && data.canRetry)) {
+      info = data.status === 'stuck' ? 'No reply yet.' : 'That didn’t work.';
+      retryBtn();
+    } else if (data.status === 'live') {
+      info = 'Live on the site. Can take a minute to show up.';
+      if (data.canUndo) acts.append(button('ghost mono', 'Undo', undo));
+      acts.append(button('pill mono', 'New chat', newChat));
+    } else if (data.status === 'undone' || data.status === 'closed') {
+      info = data.status === 'undone' ? 'Undone. Nothing from this chat is on the site.' : 'Dropped. Nothing changed.';
+      acts.append(button('pill mono', 'New chat', newChat));
+    } else {
+      bar.hidden = true;
+      return;
+    }
+    bar.append(el('span', 'info', info), acts);
+    bar.hidden = false;
+  }
+
+  async function retry(e) {
+    e.currentTarget.disabled = true;
+    try { await api('POST', { action: 'retry', chat }); }
+    catch (err) { if (err.message !== 'locked') setComposer(true, err.message, true); }
+    await refresh(true);
+  }
+
+  async function undo(e) {
+    if (!confirm('Undo this change? The site goes back to how it was before it.')) return;
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = 'Undoing…';
+    try { await api('POST', { action: 'undo', chat }); }
+    catch (err) { if (err.message !== 'locked') setComposer(false, err.message, true); }
+    await refresh(true);
+  }
+
+  async function publish(e) {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = 'Going live…';
+    try { await api('POST', { action: 'publish', chat }); }
+    catch (err) { if (err.message !== 'locked') setComposer(true, err.message, true); }
+    await refresh(true);
+  }
+
+  async function discard(e) {
+    if (!confirm('Drop this change? Nothing on the site will change.')) return;
+    e.currentTarget.disabled = true;
+    try { await api('POST', { action: 'discard', chat }); }
+    catch (err) { if (err.message !== 'locked') setComposer(true, err.message, true); }
+    await refresh(true);
+  }
+
+  /* ─── Sending ─── */
+  $('composer').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (sending || $('send').disabled) return;
+    const text = $('text').value.trim();
+    if (!text && !shots.length) return;
+    sending = true;
+    setComposer(false, shots.length ? 'Sending photos…' : 'Sending…');
+    try {
+      const res = await api('POST', { action: 'send', chat, text, images: shots });
+      $('text').value = '';
+      autosize();
+      shots = [];
+      renderShots();
+      chat = res.chat;
+      sending = false;
+      await refresh(true);
+    } catch (err) {
+      sending = false;
+      if (err.message !== 'locked') setComposer(true, err.message, true);
+    }
+  });
+
+  $('text').addEventListener('keydown', e => {
+    // Enter sends on a keyboard; on phones the return key makes a new line.
+    if (e.key === 'Enter' && !e.shiftKey && matchMedia('(hover: hover)').matches) {
+      e.preventDefault();
+      $('composer').requestSubmit();
+    }
+  });
+  $('text').addEventListener('input', autosize);
+  function autosize() {
+    const t = $('text');
+    t.style.height = 'auto';
+    t.style.height = `${Math.min(t.scrollHeight + 2, 160)}px`;
+  }
+
+  function setComposer(enabled, hint, bad) {
+    const finished = state && ['live', 'closed', 'undone'].includes(state.status);
+    $('text').disabled = !enabled || finished;
+    $('send').disabled = !enabled || finished;
+    $('attach').disabled = !enabled || finished;
+    $('text').placeholder = finished ? 'This chat is finished' : 'Message';
+    $('hint').textContent = hint || '';
+    $('hint').classList.toggle('bad', !!bad);
+  }
+
+  /* ─── Photos: shrunk to 1600px JPEG before upload ─── */
+  $('attach').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', async () => {
+    const files = [...$('file').files].slice(0, 3 - shots.length);
+    $('file').value = '';
+    for (const f of files) {
+      try { shots.push(await shrink(f)); }
+      catch (e) { setComposer(true, 'Couldn’t read that photo.', true); }
+    }
+    renderShots();
+  });
+
+  function shrink(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        // Smaller and softer until it's under ~0.9 MB, so three fit in one send.
+        let data = '';
+        for (const [side, quality] of [[1600, 0.85], [1600, 0.7], [1200, 0.7], [1000, 0.6]]) {
+          const scale = Math.min(1, side / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale);
+          c.height = Math.round(img.height * scale);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          data = c.toDataURL('image/jpeg', quality).split(',')[1];
+          if (data.length < 1_200_000) break;
+        }
+        URL.revokeObjectURL(url);
+        resolve(data);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+      img.src = url;
+    });
+  }
+
+  function renderShots() {
+    const box = $('shots');
+    box.textContent = '';
+    shots.forEach((data, i) => {
+      const wrap = el('div');
+      const img = el('img');
+      img.src = `data:image/jpeg;base64,${data}`;
+      img.alt = '';
+      const x = el('button', '', '×');
+      x.type = 'button';
+      x.setAttribute('aria-label', 'Remove photo');
+      x.addEventListener('click', () => { shots.splice(i, 1); renderShots(); });
+      wrap.append(img, x);
+      box.append(wrap);
+    });
+    box.hidden = !shots.length;
+  }
+
+  /* ─── Text: plain text with links, **bold** and our own photos ─── */
+  function renderText(node, text) {
+    // Photos are blocks already; drop the blank lines around them.
+    text = text.replace(/\s*(!\[[^\]]*\]\([^)\s]+\))\s*/g, '$1');
+    const re = /!\[[^\]]*\]\((https:\/\/raw\.githubusercontent\.com\/[^\s)]+)\)|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>()]+[^\s<>().,!?;:'"])|\*\*([^*\n]+)\*\*/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) node.append(text.slice(last, m.index));
+      if (m[1]) {
+        const img = el('img');
+        img.src = m[1];
+        img.alt = 'Photo';
+        img.loading = 'lazy';
+        node.append(img);
+      } else if (m[3] || m[4]) {
+        const a = el('a', '', m[2] || m[4]);
+        a.href = m[3] || m[4];
+        a.target = '_blank';
+        a.rel = 'noopener';
+        node.append(a);
+      } else if (m[5]) {
+        node.append(el('strong', '', m[5]));
+      }
+      last = re.lastIndex;
+    }
+    if (last < text.length) node.append(text.slice(last));
+  }
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  /* ─── Polling ─── */
+  // A hidden tab stops asking; coming back to it asks straight away.
+  function schedule(ms) { stopPolling(); timer = setTimeout(() => { if (!document.hidden) refresh(false); }, ms); }
+  function stopPolling() { clearTimeout(timer); timer = null; }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && chat !== null && key && $('list').hidden) refresh(false);
+  });
+
+  /* ─── Start ─── */
+  if (key) {
+    $('key').value = key;
+    $('gateForm').requestSubmit();
+  } else {
+    $('key').focus();
+  }
+})();
+</script>
+</body>
+</html>

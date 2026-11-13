@@ -1,0 +1,4 @@
+{
+  "git": { "deploymentEnabled": { "studio-uploads": false } },
+  "functions": { "api/studio.js": { "maxDuration": 60 } }
+}
